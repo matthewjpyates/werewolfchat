@@ -1,7 +1,7 @@
 Werewolf Chat 
-An end to end encryption android chat app with post quatum encryption
+An open source end to end encryption android chat app with post quatum encryption
 Intergrated with both TOR and I2P
-Try it now at on the Google Play Store
+Currenlty in the google play store.
 
 Https address: werewolfchat.com
 
