@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.werewolfchat.startup">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
+
+        android:theme="@style/AppTheme">
+        <activity android:name=".ConfigurePrivateServerActivity"></activity>
+        <!-- tools:replace="android:appComponentFactory" -->
+        <activity
+            android:name=".DistEndPickerActivity"
+            android:label="@string/title_activity_dist_end_picker"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
+            android:name=".ConfigureKeysAndIDActivity"
+            android:label="Configure Keys" />
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".SignInActivity" />
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
+
+        <!--android:value="ca-app-pub-7947382408011370~3422022495"-->
+
+    </application>
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
+
+</manifest>

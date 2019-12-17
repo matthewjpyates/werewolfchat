@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_root"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <TextView
+        android:id="@+id/Loading_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Loading Stored Keys"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+
+    <ImageView
+        android:id="@+id/loading_img"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/tesseract_animation" />
+
+    <TextView
+        android:id="@+id/Configure_ID_Header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Your Current Chat is:"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/generated_ID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+
+        android:text="GENERATED_ID"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/Set_customIDPrompt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Set Custom ID: "
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <EditText
+        android:id="@+id/editTextDialogUserInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textNoSuggestions">
+
+
+    </EditText>
+
+    <Button
+        android:id="@+id/button_to_set_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Update Chat ID" />
+
+    <Button
+        android:id="@+id/button_to_publish_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Publish ID and Public Key and continue">
+
+        <requestFocus />
+
+    </Button>
+
+    <Button
+        android:id="@+id/button_to_not_publish"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Continue to chat without publishing" />
+
+    <Button
+        android:id="@+id/generate_new_keys"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="make new keys" />
+
+
+</LinearLayout>
