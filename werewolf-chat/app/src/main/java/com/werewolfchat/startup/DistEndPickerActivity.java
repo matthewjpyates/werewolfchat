@@ -32,6 +32,7 @@ public class DistEndPickerActivity extends AppCompatActivity {
     private ExtrasManager extrasManager;
     private LinearLayout privServerlinearLayout;
     private boolean vollyYouCanStopNow;
+    private TokenManager tokenManager;
 
 
     public class PubKeyPullGoodResultCommand implements Utility.Command {

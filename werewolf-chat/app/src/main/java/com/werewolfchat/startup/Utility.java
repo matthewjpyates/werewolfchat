@@ -12,6 +12,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.werewolfchat.startup.ntru.encrypt.EncryptionParameters;
 
 import org.json.JSONObject;
 
@@ -30,17 +31,8 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Random;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 //import android.support.v4.widget.NestedScrollView;
 
@@ -48,6 +40,9 @@ import javax.net.ssl.X509TrustManager;
 //import static android.support.constraint.Constraints.TAG;
 
 public class Utility {
+
+
+    public static final EncryptionParameters ENCRYPTION_PARAMS = EncryptionParameters.APR2011_439_FAST;
 
 
     public static final String torAddress = "pmbldnf4zyeb4esolfmfv2uzfzdcusgzvxwkg5r6fnm7vbunjk5gvfyd.onion";
@@ -324,72 +319,9 @@ public class Utility {
         return new JSONObject();
     }
 
-    public static Intent addPrivateServerExtras(Intent intentPassedIn, String serverURL) {
-        intentPassedIn = intentPassedIn.putExtra("private_server_url", serverURL);
-
-        return intentPassedIn;
-    }
-
-    public static boolean check_if_on_private_server(Intent intentPassedIn) {
-        if (intentPassedIn.getStringExtra("private_server_url") != null) {
-            Utility.dumb_debugging("we are talking to a private server");
-            //usePrivateServer = true;
-            //serverUrl = this.getIntent().getStringExtra("private_server_url");
-            return true;
-        } else {
-            Utility.dumb_debugging("we are not talking to a private server");
-            //usePrivateServer = false;
-            return false;
-
-        }
-    }
-
-    public static Intent wipeExtras(Intent intentPassedIn) {
-        if (intentPassedIn.getStringExtra("private_server_url") != null) {
-            intentPassedIn.removeExtra("private_server_url");
-        }
 
 
-        if (intentPassedIn.getStringExtra("dest_end_id") != null) {
-            intentPassedIn.removeExtra("dest_end_id");
-        }
 
-        if (intentPassedIn.getStringExtra("dest_end_key") != null) {
-            intentPassedIn.removeExtra("dest_end_key");
-        }
-
-        if (intentPassedIn.getStringExtra("enckp_pub") != null) {
-            intentPassedIn.removeExtra("enckp_pub");
-        }
-
-        if (intentPassedIn.getStringExtra("enckp_priv") != null) {
-            intentPassedIn.removeExtra("enckp_priv");
-        }
-
-        if (intentPassedIn.getStringExtra("chat_id") != null) {
-            intentPassedIn.removeExtra("chat_id");
-        }
-
-        if (intentPassedIn.getStringExtra("firebase_uid") != null) {
-            intentPassedIn.removeExtra("firebase_uid");
-        }
-
-        if (intentPassedIn.getStringExtra("firebase_email") != null) {
-            intentPassedIn.removeExtra("firebase_email");
-        }
-
-        if (intentPassedIn.getIntExtra("proxy_port",-99) != -99) {
-            intentPassedIn.removeExtra("proxy_port");
-        }
-
-        if (intentPassedIn.getStringExtra("time_out") != null) {
-            intentPassedIn.removeExtra("time_out");
-        }
-
-
-        return intentPassedIn;
-
-    }
 
     public static  Intent addTimeOutToIntent(Intent intent, int timeOut)
     {
@@ -402,12 +334,7 @@ public class Utility {
         return  intent.getIntExtra("time_out", -1);
     }
 
-    public static boolean isTimeOutSetInIntent(Intent intent)
-    {
 
-        int timeout = intent.getIntExtra("time_out", -1);
-        return  timeout >0;
-    }
 
 
     public static boolean isServerReachable(Context context, String urlToTest) {
@@ -618,6 +545,36 @@ public class Utility {
         public void execute(String data);
     }
 
+    // /gettoken/:chatid
+    public static String makeGetStringForPullingNewToken(String serverUrl, String user) {
+        return serverUrl + "gettoken/" + user;
+    }
+
+    // /changechatid/:oldchatid/:newchatid/:token
+    public static String makeGetStringForChangingChatID(String serverUrl, String oldUser, String newUser, String token) {
+        return serverUrl + "changechatid/" + oldUser + "/" + newUser + "/" + token;
+    }
+
+    // /verifykey/:chatid/:token
+    public static String makeVerifyKeyURL(String serverUrl, String user, String token) {
+        return serverUrl + "verifykey/" + user + "/" + token;
+    }
+
+
+    ///sendmessage/:tochatid/:fromchatid/:messagetosend/:token
+    public static String makeGetStringForPublishingMessages(String serverUrl, String toid, String fromid, String message, String token) {
+        return serverUrl + "sendmessage/" + toid + "/" + fromid + "/" + message + "/" + token;
+    }
+
+    // /messages/:chatid/:token
+    public static String makeGetStringForPullingMessagesWithToken(String serverUrl, String user, String token) {
+        return serverUrl + "messages/" + user + "/" + token;
+    }
+
+    // /messagesaftertime/:chatid/:time/:token
+    public static String makeGetStringForPullingMessagesAfterTime(String serverUrl, String user, long time, String token) {
+        return serverUrl + "messagesaftertime/" + user + "/" + Long.toString(time) + "/" + token;
+    }
 
     public static void queryURL(String url, RequestQueue passedInQueue, Command inputWorkerForGood, Command inputWorkerForBad) {
         final Command worker_good = inputWorkerForGood;

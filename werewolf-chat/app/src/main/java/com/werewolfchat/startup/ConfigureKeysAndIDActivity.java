@@ -12,7 +12,6 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,12 +30,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.werewolfchat.startup.Utility.addProxyToIntent;
-import static com.werewolfchat.startup.Utility.addTimeOutToIntent;
 import static com.werewolfchat.startup.Utility.dumb_debugging;
-import static com.werewolfchat.startup.Utility.getProxyPortFromIntent;
-import static com.werewolfchat.startup.Utility.getTimeOutFromIntnet;
-import static com.werewolfchat.startup.Utility.isTheProxyPortExtraNull;
+import static com.werewolfchat.startup.Utility.queryURL;
 import static com.werewolfchat.startup.ntru.util.ArrayEncoder.bytesToHex;
 
 //import android.support.v7.app.AppCompatActivity;
@@ -71,6 +66,7 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
     private String privateServerURL;
     private RequestQueue queue;
     private ExtrasManager extrasManager;
+    private TokenManager tokenManager;
 
 
 
@@ -108,6 +104,11 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
             this.werewolfChatId = parts[2];
             this.setGoodNews("Keyfile loaded");
             this.isTheIdGood = true;
+            this.extrasManager.setChatID(this.werewolfChatId);
+            this.extrasManager.loadKeyPair(encKP);
+            this.tokenManager = this.extrasManager.makeNewTokenManager();
+            this.tokenManager.getNewToken(this.queue);
+            this.setError("unable to get auth token for keyfile");
         } else {
 
 
@@ -119,12 +120,21 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
             //this.ntruSig = new NtruSign(SIGNATURE_PARAMS);
             this.encKP = ntruEnc.generateKeyPair();
             //this.sigKP = ntruSig.generateKeyPair();
-            update_id(Utility.makeRandomString());
-
+            this.extrasManager.setPrivKey(this.encKP.getPrivate().getEncoded());
+            this.extrasManager.setPubKey(this.encKP.getPublic().getEncoded());
+            this.extrasManager.setChatID(Utility.makeRandomString());
+            //update_id(Utility.makeRandomString());
+            update_id_field_without_publishing(this.extrasManager.getChatID());
             this.setGoodNews("Keys generated");
 
 
         }
+    }
+
+    public void update_id_field_without_publishing(String newID) {
+        this.chatIDView.setText(newID);
+        this.extrasManager.setChatID(newID);
+        this.werewolfChatId = newID;
     }
 
     public void setError(String errMesg) {
@@ -149,12 +159,17 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
             Utility.dumb_debugging("old key file wipped");
         }
 
-        this.loadingView.setText("Making new keys");
+        this.loadingView.setText("Generating new keys");
+
         this.ntruEnc = new NtruEncrypt(ENCRYPTION_PARAMS);
         //this.ntruSig = new NtruSign(SIGNATURE_PARAMS);
         this.encKP = ntruEnc.generateKeyPair();
         //this.sigKP = ntruSig.generateKeyPair();
-        update_id(Utility.makeRandomString());
+        this.extrasManager.setPrivKey(this.encKP.getPrivate().getEncoded());
+        this.extrasManager.setPubKey(this.encKP.getPublic().getEncoded());
+        this.extrasManager.setChatID(Utility.makeRandomString());
+        update_id_field_without_publishing(this.extrasManager.getChatID());
+        //update_id(Utility.makeRandomString());
         this.setGoodNews("Keys generated");
 
     }
@@ -163,7 +178,7 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
 
     //TODO make a more OOP way to handle proxies so I dont have identical code in multiple classes
     //proxy methods
-
+/*
     private boolean isUsingProxy;
     private int proxy_port;
     private int timeOut;
@@ -205,7 +220,7 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
             this.queue = Volley.newRequestQueue(this);
 
     }
-
+*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -218,6 +233,7 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
 
         Intent theIntent = this.getIntent();
         this.extrasManager = new ExtrasManager( theIntent);
+
 
         this.usingPrivateServer = true;
         privateServerURL = this.extrasManager.getPrivateServerURL();
@@ -252,7 +268,8 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.button_to_set_id:
-                this.update_id(this.idInput.getText().toString());
+                update_id_field_without_publishing(this.idInput.getText().toString());
+                this.update_id(this.extrasManager.getChatID());
                 break;
             case R.id.button_to_publish_info:
                 this.publishKeyWrapper();
@@ -303,18 +320,93 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
 
     }
 
-    public class PubKeyPublishGoodResultCommand implements Utility.Command {
+
+    public class ChangeIDGoodResult implements Utility.Command {
+
+        public String newID;
+
+        public ChangeIDGoodResult(String id) {
+            this.newID = id;
+        }
+
         public void execute(String data) {
-            if (data.equals("chatidtaken") && !isTheIdGood) {
-                publish_button.setText("ID taken, can't publish, choose new id");
+            if (data.equals("token failed")) {
+                publish_button.setText("bad server token");
+                dumb_debugging("got the token fail result");
+                return;
+            } else if (data.equals("chatid changed")) {
+                werewolfChatId = this.newID;
+                dumb_debugging("changing chatid after server");
+                return;
+            } else {
+                publish_button.setText("server error");
+                dumb_debugging("did not get a valid response from the server");
+            }
+        }
+    }
+
+    public class ChangeIDFail implements Utility.Command {
+        public void execute(String data) {
+
+            publish_button.setText("Could not update ID");
+            dumb_debugging("failed to update chat id:\n" + data);
+
+        }
+    }
+
+    public class VerifyPubKeyGood implements Utility.Command {
+        public void execute(String data) {
+            if (data.startsWith("fail:")) {
+                publish_button.setText("Key Verification Failed");
                 return;
             }
-            isTheIdGood = true;
             setkeyStringsFile();
             startActivity(makeIntentWithKeys());
             finish();
             return;
 
+        }
+    }
+
+
+    public class VerifyPubKeyFail implements Utility.Command {
+        public void execute(String data) {
+            publish_button.setText("Key Verification Failed");
+            dumb_debugging(data);
+        }
+    }
+
+
+    public class PubKeyPublishGoodResultCommand implements Utility.Command {
+        public void execute(String data) {
+            if (data.equals("chatidtaken") && !isTheIdGood) {
+                publish_button.setText("ID taken, can't publish, choose new id");
+                return;
+            } else if (data.startsWith("fail:")) {
+                publish_button.setText("Failed to publish");
+                return;
+            } else if (data.startsWith("good:")) {
+                String encryptedtoken = data.split(":")[1].trim();
+                dumb_debugging("the encrypted token is:" + encryptedtoken);
+                tokenManager = extrasManager.makeNewTokenManager();
+                tokenManager.loadTokenOffline(encryptedtoken);
+
+                if (tokenManager.isTokenSet()) {
+
+                    isTheIdGood = true;
+                    publish_button.setText("Verifying Key File");
+                    Utility.queryURL(Utility.makeVerifyKeyURL(extrasManager.getPrivateServerURL(),
+                            extrasManager.getChatID(), tokenManager.getTokenString()),
+                            queue, new VerifyPubKeyGood(), new VerifyPubKeyFail());
+                    return;
+                } else {
+                    publish_button.setText("Received a bad token");
+                    return;
+
+                }
+            }
+            isTheIdGood = false;
+            publish_button.setText("Failed to publish");
         }
     }
 
@@ -331,14 +423,40 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
     public void publish_private_server_info() {
         String keystr = ArrayEncoder.bytesToHex(this.encKP.getPublic().getEncoded());
         String queryStr = Utility.makeGetStringForPublishingKey(this.privateServerURL, this.werewolfChatId, keystr);
+        extrasManager.setPubKey(this.encKP.getPublic().getEncoded());
+        extrasManager.setPrivKey(this.encKP.getPrivate().getEncoded());
+        extrasManager.setPrivateServerURL(this.privateServerURL);
+        extrasManager.setChatID(this.werewolfChatId);
         Utility.queryURL(queryStr, this.queue, new PubKeyPublishGoodResultCommand(), new PubKeyPublishBadResultCommand());
         return;
     }
 
     public void update_id_private_server(String chatId) {
         this.isTheIdGood = false;
-        this.werewolfChatId = chatId;
-        this.chatIDView.setText(chatId);
+        if (this.tokenManager == null) {
+            dumb_debugging("the token manager was null when I tried to update my id");
+            this.extrasManager.setChatID(this.werewolfChatId);
+            this.tokenManager = this.extrasManager.makeNewTokenManager();
+            this.tokenManager.getNewToken(this.queue);
+            this.setGoodNews("authenticating with server");
+            return;
+        } else if (!this.tokenManager.isTokenSet()) {
+            dumb_debugging("the token manager was not ready to give a token");
+            if (this.queue == null)
+                this.queue = this.extrasManager.makeVolley(this);
+            this.tokenManager.getNewToken(this.queue);
+            this.setGoodNews("authenticating with server");
+            return;
+        } else {
+
+            String queryStr = Utility.makeGetStringForChangingChatID(this.extrasManager.getPrivateServerURL(), this.werewolfChatId, chatId, this.tokenManager.getTokenString());
+            dumb_debugging("about to query the  server with this string:\n" + queryStr);
+            queryURL(queryStr, this.queue, new ChangeIDGoodResult(chatId), new ChangeIDFail());
+
+        }
+
+        //this.werewolfChatId = chatId;
+        //this.chatIDView.setText(chatId);
         return;
     }
 

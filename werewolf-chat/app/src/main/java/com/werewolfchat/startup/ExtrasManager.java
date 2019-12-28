@@ -5,8 +5,13 @@ import android.content.Intent;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.werewolfchat.startup.ntru.encrypt.EncryptionKeyPair;
+import com.werewolfchat.startup.ntru.encrypt.EncryptionPublicKey;
+import com.werewolfchat.startup.ntru.encrypt.NtruEncrypt;
 
 import java.util.ArrayList;
+
+import static com.werewolfchat.startup.Utility.ENCRYPTION_PARAMS;
 
 public class ExtrasManager {
 
@@ -22,41 +27,45 @@ public class ExtrasManager {
             return;
         switch (extraFieldToSet)
         {
-            case "private_server_url":
+            case PRIVATE_SERVER_URL_EXTRA:
                 setPrivateServerURL((String) valueToSet);
                 break;
-            case "dest_end_id":
+            case DIST_END_ID_EXTRA:
                 setDestEndID((String) valueToSet);
                 break;
-            case "dest_end_key":
+            case DIST_END_KEY_EXTRA:
                 setDestKey((byte[]) valueToSet);
                 break;
-            case "enckp_pub":
+            case PUBLIC_KEY_BYTE_ARRAY_EXTRA:
                 setPubKey((byte[]) valueToSet);
                 break;
-            case "enckp_priv":
+            case PRIVATE_KEY_BYTE_ARRAY_EXTRA:
                 setPrivKey((byte[]) valueToSet);
                 break;
-            case "chat_id":
+            case CHAT_ID_EXTRA:
                 setChatID((String) valueToSet);
                 break;
-            case "firebase_uid":
+            case FIREBASE_UID_EXTRA:
                 setFirebaseUID((String) valueToSet);
                 break;
-            case "firebase_email":
+            case FIREBASE_EMAIL_EXTRA:
                 setFirebaseEmail((String) valueToSet);
                 break;
-            case "proxy_port":
+            case PROXY_PORT_EXTRA:
                 if((Integer) valueToSet > 0)
                     setProxyPort((Integer) valueToSet);
                 break;
-            case "time_out":
+            case TIME_OUT_EXTRA:
                 if((Integer) valueToSet > 0)
                     setTimeOut((Integer) valueToSet);
                 break;
-            case "use_self_signed_cert":
+            case USING_SELF_SIGNED_TLS_CERT_EXTRA:
                 setUsingSelfSignedTLSCert((boolean) valueToSet);
                 break;
+            case TOKEN_STR:
+                setTokenString((String) valueToSet);
+                break;
+
         }
     }
 
@@ -110,6 +119,7 @@ public class ExtrasManager {
             this.extraStrings = extraStrings;
         }
 
+
         public String getPrivateServerURL() {
             return privateServerURL;
         }
@@ -160,7 +170,6 @@ public class ExtrasManager {
             this.firebaseEmail = firebaseEmail;
             this.hasFirebaseEmail = true;
             this.intent.putExtra(FIREBASE_EMAIL_EXTRA, firebaseEmail);
-
         }
 
         public byte[] getPubKey() {
@@ -179,6 +188,18 @@ public class ExtrasManager {
 
         }
 
+    public String getTokenString() {
+        return this.tokenString;
+    }
+
+    public void loadKeyPair(EncryptionKeyPair ekp) {
+        this.setPubKey(ekp.getPublic().getEncoded());
+        this.setPrivKey(ekp.getPrivate().getEncoded());
+    }
+
+    public EncryptionKeyPair getKeyPair() {
+        return new EncryptionKeyPair(this.getPubKey(), this.getPrivKey());
+    }
         public void setPrivKey(byte[] privKey) {
             this.privKey = privKey;
             this.hasPrivateKey = true;
@@ -189,6 +210,10 @@ public class ExtrasManager {
             return destKey;
         }
 
+    public EncryptionPublicKey getDestKeyAsEncryptionPublicKey() {
+        return new EncryptionPublicKey(this.getDestKey());
+    }
+
         public void setDestKey(byte[] destKey) {
             this.destKey = destKey;
             this.hasDistEndKey = true;
@@ -196,10 +221,28 @@ public class ExtrasManager {
 
         }
 
+    public TokenManager makeNewTokenManager() {
+        return new TokenManager(this.getChatID(), this.getPrivateServerURL(), this.getKeyPair(), new NtruEncrypt(ENCRYPTION_PARAMS));
+    }
+
+    public TokenManager makeNewTokenManager(String newStr) {
+
+        TokenManager tm = new TokenManager(this.getChatID(), this.getPrivateServerURL(), this.getKeyPair(), new NtruEncrypt(ENCRYPTION_PARAMS));
+        tm.setTokenString(newStr);
+        return tm;
+    }
+
+    public void setTokenString(String inputTokenStr) {
+        this.tokenString = inputTokenStr;
+        this.hasTokenString = true;
+        this.intent.putExtra(TOKEN_STR, tokenString);
+
+    }
+
         public Intent intent;
         public int proxyPort, timeOut;
         public ArrayList<String> extraStrings;
-        public String privateServerURL, chatID, destEndID, firebaseUID, firebaseEmail;
+    public String privateServerURL, chatID, destEndID, firebaseUID, firebaseEmail, tokenString;
         public byte[] pubKey, privKey, destKey;
 
         public static final String PRIVATE_SERVER_URL_EXTRA = "private_server_url";
@@ -213,9 +256,11 @@ public class ExtrasManager {
         public static final String PROXY_PORT_EXTRA = "proxy_port";
         public static final String TIME_OUT_EXTRA = "time_out";
         public static final String USING_SELF_SIGNED_TLS_CERT_EXTRA = "use_self_signed_cert";
+    public static final String TOKEN_STR = "token_str";
 
         public boolean hasPrivateServerURL, hasDistEndID, hasDistEndKey, hasPublicKey, hasPrivateKey;
         public boolean hasChatID, hasFirebaseUID, hasFirebaseEmail, hasProxyPort, hasTimeOut, usingselfSignedCert;
+    public boolean hasTokenString;
 
 
         public void setBoolsToFalse()
@@ -231,6 +276,7 @@ public class ExtrasManager {
             this.hasProxyPort = false;
             this.hasTimeOut = false;
             this.usingselfSignedCert = false;
+            this.hasTokenString = false;
         }
 
 
@@ -259,7 +305,8 @@ public class ExtrasManager {
                 this.setTimeOut(this.intent.getIntExtra(TIME_OUT_EXTRA, -1));
             if(this.intent.hasExtra(USING_SELF_SIGNED_TLS_CERT_EXTRA))
                 this.usingselfSignedCert = true;
-
+            if (this.intent.hasExtra(TOKEN_STR))
+                this.setTokenString(this.intent.getStringExtra(TOKEN_STR));
         }
 
 
@@ -284,6 +331,7 @@ public class ExtrasManager {
             this.extraStrings.add(PROXY_PORT_EXTRA);
             this.extraStrings.add(TIME_OUT_EXTRA);
             this.extraStrings.add(USING_SELF_SIGNED_TLS_CERT_EXTRA);
+            this.extraStrings.add(TOKEN_STR);
         }
 
         public void  wipeIntent()

@@ -24,7 +24,6 @@ import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -46,10 +45,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.google.android.gms.ads.AdLoader;
+import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.werewolfchat.startup.ntru.encrypt.EncryptionKeyPair;
-import com.werewolfchat.startup.ntru.encrypt.EncryptionParameters;
 import com.werewolfchat.startup.ntru.encrypt.EncryptionPublicKey;
 import com.werewolfchat.startup.ntru.encrypt.NtruEncrypt;
 import com.werewolfchat.startup.ntru.sign.NtruSign;
@@ -65,12 +67,13 @@ import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+import static com.werewolfchat.startup.Utility.ENCRYPTION_PARAMS;
 import static com.werewolfchat.startup.Utility.dumb_debugging;
+import static com.werewolfchat.startup.Utility.makeGetStringForPullingMessagesAfterTime;
 
 
 public class MainActivity extends AppCompatActivity {
     private static final SignatureParameters SIGNATURE_PARAMS = SignatureParameters.APR2011_439_PROD;
-    private static final EncryptionParameters ENCRYPTION_PARAMS = EncryptionParameters.APR2011_439_FAST;
     NtruEncrypt ntruEnc;
     NtruSign ntruSig;
 
@@ -120,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
     public volatile boolean doneCheckingforMessages;
 
 
-
     // encryption values
     private File priavteKeyStorage;
     private static final String PATH = "werewolfchatkeys/";
@@ -133,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
     // add stuff
     private AdView mAdView;
     private AdLoader nativeAdLoader;
-
 
 
     // buttons showing to and from
@@ -151,10 +152,7 @@ public class MainActivity extends AppCompatActivity {
     private Handler handler;
     private Runnable queryCaller;
     private ExtrasManager extrasManager;
-
-
-
-
+    private TokenManager tokenManager;
 
 
     public class PrivateServerAdapter extends RecyclerView.Adapter {
@@ -198,8 +196,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void startPullingMessages()
-    {
+    public void startPullingMessages() {
         doneCheckingforMessages = false;
         this.pullAllMessages();
 
@@ -210,20 +207,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
 
-                if(doneCheckingforMessages) {
+                if (doneCheckingforMessages) {
                     dumb_debugging("stopping the messages from being pulled");
                     return;
                 }
                 pullAllMessagesAfterTime(lastPullTime);
 
 
-                if(extrasManager.getTimeOut() > 0)
-                {
+                if (extrasManager.getTimeOut() > 0) {
                     // Repeat for half a second longer than the timeout
-                    handler.postDelayed(this, extrasManager.getTimeOut()  +500);
-                }
-                else
-                {
+                    handler.postDelayed(this, extrasManager.getTimeOut() + 500);
+                } else {
                     // default will be 4 seconds
                     handler.postDelayed(this, 4000);
                 }
@@ -262,7 +256,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void sendMessageWithPrivateServer(String toid, String fromid, String message) {
-        String queryStr = Utility.makeGetStringForPublishingMessages(this.serverUrl, toid, fromid, message);
+
+        //String queryStr = makeGetStringForPublishingMessages(this.serverUrl, toid, fromid, message,tokenManager.getTokenString());
+        String queryStr = Utility.makeGetStringForPullingMessagesWithToken(extrasManager.getPrivateServerURL(), extrasManager.getChatID(), tokenManager.getTokenString());
+        //String queryStr = makeGetStringForPublishingMessages(this.serverUrl, toid, fromid, message);
         Utility.queryURL(queryStr, this.queue, new GoodMessageSend(), new BadMessageSend());
     }
 
@@ -315,7 +312,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void pullAllMessages() {
-        String queryStr = Utility.makeGetStringForPullingMessages(this.serverUrl, this.werewolfChatId);
+        //String queryStr = Utility.makeGetStringForPullingMessages(this.serverUrl, this.werewolfChatId);
+        String queryStr = Utility.makeGetStringForPullingMessagesWithToken(extrasManager.getPrivateServerURL(), extrasManager.getChatID(), extrasManager.tokenString);
+
         Utility.queryURL(queryStr, this.queue, new PullMessageGoodResults(), new PullMessageBadResults());
         lastPullTime = System.currentTimeMillis();
 
@@ -323,8 +322,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void pullAllMessagesAfterTime(long time) {
-        String queryStr = Utility.makeGetStringForPullingMessagesAfterTime(this.serverUrl, this.werewolfChatId, time);
-        System.out.println(queryStr);
+        //String queryStr = Utility.makeGetStringForPullingMessagesAfterTime(this.serverUrl, this.werewolfChatId, time);
+        String queryStr = makeGetStringForPullingMessagesAfterTime(extrasManager.getPrivateServerURL(), extrasManager.getChatID(), time, extrasManager.tokenString);
+        dumb_debugging(queryStr);
         Utility.queryURL(queryStr, this.queue, new PullMessageGoodResults(), new PullMessageBadResults());
         lastPullTime = System.currentTimeMillis();
 
@@ -339,7 +339,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         } else {
             Utility.dumb_debugging("in load_intent about to make a new enc KP from extras");
-            this.encKP = new EncryptionKeyPair(this.extrasManager.getPubKey(), this.extrasManager.getPrivKey());
+            this.encKP = this.extrasManager.getKeyPair();
             Utility.dumb_debugging("about to set chat id from extras");
             this.werewolfChatId = this.extrasManager.getChatID();
             String asButtonText = "As: " + this.werewolfChatId;
@@ -347,17 +347,14 @@ public class MainActivity extends AppCompatActivity {
             this.serverUrl = this.extrasManager.getPrivateServerURL();
         }
 
-      // if the distant end is configured, set up the key
+        // if the distant end is configured, set up the key
         if (this.extrasManager.areAllTheDistEndExtrasSet()) {
             this.destinationID = this.extrasManager.getDestEndID();
-            this.destinationKey = new EncryptionPublicKey(this.extrasManager.getDestKey());
+            this.destinationKey = this.extrasManager.getDestKeyAsEncryptionPublicKey();
             String toButtonText = "To: " + this.destinationID;
             this.toButton.setText(toButtonText);
         }
-
-
     }
-
 
 
     @Override
@@ -367,12 +364,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // needed to allow volly
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            StrictMode.setThreadPolicy(policy);
-
-
-
-
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
 
 
         context = this;
@@ -380,6 +373,7 @@ public class MainActivity extends AppCompatActivity {
         this.extrasManager.loadIntent();
 
         this.queue = this.extrasManager.makeVolley(this);
+
 
 
         /*for real adloader info ca-app-pub-7947382408011370/3809869453 */
@@ -390,7 +384,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Set default username is anonymous.
         mUsername = ANONYMOUS;
-
 
 
         this.toButton = (Button) findViewById(R.id.toButton);
@@ -404,13 +397,9 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(this, SignInActivity.class));
             finish();
             return;
-        }
-        else if (!this.extrasManager.areAllTheLocalPKIExtrasSet())
-        {
+        } else if (!this.extrasManager.areAllTheLocalPKIExtrasSet()) {
             // if any of the pki extras are not set and if any of the pki varibles are not set
             // then we need to call the key management activity
-
-
 
 
             extrasManager.copyOverExtrasAndChangeClassToPrepareToStartNewActivity(MainActivity.this,
@@ -419,14 +408,12 @@ public class MainActivity extends AppCompatActivity {
             startActivity(extrasManager.getIntent());
             finish();
             return;
-        }
-  else {
+        } else {
             //we are using a private server
 
 
-
-            //TODO maybe try to get a small banner add worker so I can make a litte cash off this one day
-        /*    MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            //see if we can get the add bar to load
+            MobileAds.initialize(this, new OnInitializationCompleteListener() {
                 @Override
                 public void onInitializationComplete(InitializationStatus initializationStatus) {
                 }
@@ -438,13 +425,12 @@ public class MainActivity extends AppCompatActivity {
             mAdView.loadAd(adRequest);
 
 
-         */
+
 
 
             mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
 
             initlize_chat();
-
 
 
             // Initialize ProgressBar and RecyclerView.
@@ -491,7 +477,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-             extrasManager.copyOverExtrasAndChangeClassToPrepareToStartNewActivity(MainActivity.this,
+                extrasManager.copyOverExtrasAndChangeClassToPrepareToStartNewActivity(MainActivity.this,
                         DistEndPickerActivity.class);
                 startActivity(extrasManager.getIntent());
                 finish();
@@ -551,13 +537,13 @@ public class MainActivity extends AppCompatActivity {
                         null /* no image */,
                         werewolfChatId,
                         destinationID);
-                Utility.dumb_debugging("about to send this text \n"+werewolfMessage.getText()+
+                Utility.dumb_debugging("about to send this text \n" + werewolfMessage.getText() +
                         "\nwith this key \n" + ArrayEncoder.bytesToHex(destinationKey.getEncoded()));
                 werewolfMessage.convertPlainTextStringToEncryptedHexString(destinationKey, ntruEnc);
                 Utility.dumb_debugging("about to send this text \n" + werewolfMessage.getText());
 
 
-                    sendMessageWithPrivateServer(destinationID, werewolfChatId, werewolfMessage.getText());
+                sendMessageWithPrivateServer(destinationID, werewolfChatId, werewolfMessage.getText());
 
                 mMessageEditText.setText("");
             }
@@ -574,6 +560,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        this.tokenManager = this.extrasManager.makeNewTokenManager(this.extrasManager.getTokenString());
 
         // registers the runable to start the volleys
         startPullingMessages();
@@ -605,7 +592,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         doneCheckingforMessages = false;
 
-        if(this.queue != null)
+        if (this.queue != null)
             startPullingMessages();
 
 
@@ -638,13 +625,13 @@ public class MainActivity extends AppCompatActivity {
                 doneCheckingforMessages = true;
                 this.queue.stop();
                 this.queue.cancelAll(new RequestQueue.RequestFilter() {
-                @Override
-                public boolean apply(Request<?> request) {
-                    return true;
-                }
-            });
+                    @Override
+                    public boolean apply(Request<?> request) {
+                        return true;
+                    }
+                });
                 this.handler.removeCallbacks(this.queryCaller);
-               // queryCaller.
+                // queryCaller.
 
 
                 Intent signInIntent = new Intent(this, SignInActivity.class);
