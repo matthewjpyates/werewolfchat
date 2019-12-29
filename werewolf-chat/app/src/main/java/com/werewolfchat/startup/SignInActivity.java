@@ -53,8 +53,8 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
 
     private EditText privateServerInput;
-    private EditText privateServerPortInput;
-    private EditText privateServerPasscodeInput;
+    private EditText privateServerProxyPortInput;
+
 
 
     private EditText httpsProxyPortTextField;
@@ -72,14 +72,12 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
 
         // add private server button
-        privateServerButton = (Button) findViewById(R.id.private_sign_in_button);
+        privateServerButton = (Button) findViewById(R.id.private_server_sign_in_button);
 
         // add edit text for the private server url
         privateServerInput = (EditText) findViewById(R.id.private_server_url_input);
 
-        privateServerPortInput = (EditText) findViewById(R.id.private_server_port_input);
-
-        privateServerPasscodeInput = (EditText) findViewById(R.id.private_server_passcode_input);
+        privateServerProxyPortInput = (EditText) findViewById(R.id.private_server_proxy_port);
 
 
         httpsProxyPortTextField = (EditText) findViewById(R.id.https_edit_text);
@@ -117,7 +115,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 i2pServerSignIn();
                 break;
 
-            case R.id.private_sign_in_button:
+            case R.id.private_server_sign_in_button:
                 privateServerSignIn();
                 break;
         }
@@ -248,6 +246,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
     private void privateServerSignIn() {
         String hostname = privateServerInput.getText().toString();
+        hostname = hostname.trim();
         // no more ssl nuking for now
         // TODO figure out how to get run time shady certs the the user might need to work without nuking all the good certs
         //Utility.nuke();
@@ -259,29 +258,36 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
             privateServerButton.setText("URL not set");
             return;
         }
-        int portNum = 443;
-        if (!privateServerPortInput.getText().toString().isEmpty()) {
-            portNum = Integer.parseInt(privateServerPortInput.getText().toString());
+        int proxyPortNum = -1;
+        if (!privateServerProxyPortInput.getText().toString().isEmpty()) {
+            proxyPortNum = Integer.parseInt(privateServerProxyPortInput.getText().toString());
+            if (proxyPortNum < 1) {
+                privateServerButton.setText("Bad Proxy Port");
+                return;
+
+            }
         }
-        String passcode = privateServerPasscodeInput.getText().toString();
 
-        if (!passcode.isEmpty()) {
-            passcode = passcode + "/";
+        if (!(hostname.startsWith("http://") || hostname.startsWith("https://"))) {
+            privateServerButton.setText("assuming http");
+            hostname = "http://" + hostname;
+
         }
 
-        String privateServerURL = "https://" + hostname + ":" + Integer.toString(portNum) + "/" + passcode;
-
-        Utility.dumb_debugging("Checking this server " + privateServerURL);
-
-        privateServerButton.setText("checking server " + privateServerURL);
-        if (isServerReachable(this, privateServerURL + "pubkeys")) {
+        Utility.dumb_debugging("Checking this server " + hostname + " with proxy " + proxyPortNum);
+        if ((proxyPortNum > 0) ? isServerReachable(this, hostname, proxyPortNum) : isServerReachable(this, hostname)) {
             extrasManager.copyOverExtrasAndChangeClassToPrepareToStartNewActivity(SignInActivity.this,
                     ConfigureKeysAndIDActivity.class);
-            extrasManager.setPrivateServerURL(privateServerURL);
+            extrasManager.setPrivateServerURL(hostname);
+            if (proxyPortNum > 0) {
+                extrasManager.setProxyPort(proxyPortNum);
+            }
+            extrasManager.setPrivateServerURL(hostname);
             startActivity(extrasManager.getIntent());
             finish();
         } else {
             privateServerButton.setText("server test failed, please try again");
         }
+
     }
 }

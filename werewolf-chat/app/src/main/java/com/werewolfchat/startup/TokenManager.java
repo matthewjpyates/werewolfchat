@@ -64,6 +64,22 @@ public class TokenManager {
 
     }
 
+    public class FeedBackWrapperForTokenPulls implements Utility.Command {
+        public Utility.Command feedBackWorker;
+        public Utility.Command tokenPullDebugger;
+
+        public FeedBackWrapperForTokenPulls(Utility.Command feedBack, Utility.Command tokenPuller) {
+            this.feedBackWorker = feedBack;
+            this.tokenPullDebugger = tokenPuller;
+        }
+
+        public void execute(String data) {
+            feedBackWorker.execute(data);
+            tokenPullDebugger.execute(data);
+        }
+    }
+
+
     public class GoodTokenPull implements Utility.Command {
         public void execute(String data) {
             requestInProgress = false;
@@ -143,6 +159,21 @@ public class TokenManager {
         queryURL(getNewTokenUrl, passedInQueue, new GoodTokenPull(), new BadTokenPull());
 
     }
+
+    public void getNewToken(RequestQueue passedInQueue, Utility.Command feedbackWorker) {
+        if (this.requestInProgress) {
+            dumb_debugging("request cancelled since one is already being sent");
+            return;
+        }
+        isSet = false;
+        requestInProgress = true;
+        String getNewTokenUrl = Utility.makeGetStringForPullingNewToken(this.serverURL, this.userId);
+        dumb_debugging("about to request new token with \n" + getNewTokenUrl);
+
+        queryURL(getNewTokenUrl, passedInQueue, new FeedBackWrapperForTokenPulls(feedbackWorker, new GoodTokenPull()), new FeedBackWrapperForTokenPulls(feedbackWorker, new BadTokenPull()));
+
+    }
+
 
     public void loadTokenOffline(String passedInToken) {
         String newTokenString = convertEncryptedHexStringToPlainTextString(passedInToken);

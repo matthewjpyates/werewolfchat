@@ -297,6 +297,7 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
         extrasManager.setPubKey(this.encKP.getPublic().getEncoded());
         extrasManager.setPrivKey(this.encKP.getPrivate().getEncoded());
         extrasManager.setChatID(this.werewolfChatId);
+        extrasManager.setTokenString(this.tokenManager.getTokenString());
 
 
 
@@ -414,6 +415,7 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
         public void execute(String data) {
 
             isTheIdGood = false;
+            dumb_debugging(data);
             publish_button.setText("Could not contact server");
 
         }
