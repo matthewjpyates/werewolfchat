@@ -1,0 +1,42 @@
+digraph {
+    label="Configure Id Actvity"
+ 
+    start[shape="box", style=rounded];
+    start_main_activity[shape="box", style=rounded];
+    Does_key_file_exist[shape="diamond", style=""];
+    Is_the_first_run_flag_set[shape="diamond", style=""];
+    send_token_to_verify[shape="box", style=""];
+
+    make_keys[shape="box", style=""];
+    load_keys[shape="box", style=""];
+    user_input[shape="parallelogram", style=""];
+    write_keys_to_file[shape="box", style=""];
+    change_chat_id[shape="parallelogram", style=""];
+    publish_keys_and_chatid[shape="box", style=""];
+    server_moves_keys_to_published[shape="box", style=""];
+    app_decrypts_token[shape="box", style=""];
+    send_token_to_verify[shape="box", style=""];
+    sends_encrypted_token_back[shape="box", style=""];
+    server_places_key_in_temp_storage[shape="box", style=""];
+
+    start -> Does_key_file_exist;
+    Does_key_file_exist ->make_keys[label="no"];
+    Does_key_file_exist ->load_keys[label="yes"];
+    make_keys ->  Is_the_first_run_flag_set;
+    load_keys ->  Is_the_first_run_flag_set;
+    Is_the_first_run_flag_set -> user_input[label="no"];
+    Is_the_first_run_flag_set -> publish_keys_and_chatid;
+    publish_keys_and_chatid -> server_places_key_in_temp_storage;
+    server_places_key_in_temp_storage -> sends_encrypted_token_back;
+    sends_encrypted_token_back ->app_decrypts_token;
+    app_decrypts_token -> send_token_to_verify;
+    send_token_to_verify -> server_moves_keys_to_published;
+    server_moves_keys_to_published -> write_keys_to_file;
+    write_keys_to_file -> start_main_activity;
+    user_input ->make_keys[label="make new keys"];
+    user_input -> change_chat_id[label="change chat id"];
+    user_input -> publish_keys_and_chatid[label="publish keys"];
+    change_chat_id -> user_input;
+
+
+}

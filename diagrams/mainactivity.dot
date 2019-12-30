@@ -1,0 +1,33 @@
+digraph {
+    label="Main Actvity"
+ 
+    start[shape="box", style=rounded];
+    sign_in_activity[shape="box", style=rounded];
+    Do_I_have_a_server_URL[shape="diamond", style=""];
+    Do_I_have_keys[shape="diamond", style=""];
+
+
+
+    user_input[shape="parallelogram", style=""];
+    configure_id_activity[shape="box", style=rounded];
+    configure_dist_end_activity[shape="box", style=rounded];
+    encrypt_text[shape="box", style=""];
+    send_encrypted_text_to_server[shape="box", style=""];
+    pull_messages[shape="box", style=""];
+    decrypt_messages[shape="box", style=""];
+
+
+    start ->  Do_I_have_a_server_URL;
+    Do_I_have_a_server_URL ->sign_in_activity[label="no"];
+    Do_I_have_a_server_URL ->Do_I_have_keys[label="yes"];
+    Do_I_have_keys -> configure_id_activity[label="no"];
+    Do_I_have_keys -> user_input[label="yes"];
+    user_input -> configure_id_activity[label="as: button"];
+    user_input -> configure_dist_end_activity[label="to: button"];
+    user_input -> encrypt_text[label="send button"];
+    encrypt_text -> send_encrypted_text_to_server;
+    send_encrypted_text_to_server -> user_input;
+    user_input -> pull_messages[label="automatically"];
+    pull_messages -> decrypt_messages;
+    decrypt_messages ->user_input;
+}

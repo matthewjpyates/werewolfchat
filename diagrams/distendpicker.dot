@@ -1,0 +1,22 @@
+digraph {
+    label="Distint end picker Actvity"
+ 
+    start[shape="box", style=rounded];
+    start_main_activity[shape="box", style=rounded];
+    display_userids[shape="box", style=""];
+
+    load_distint_end_information[shape="box", style=""];
+    pull_public_keys_and_user_ids[shape="box", style=""];
+    user_input[shape="parallelogram", style=""];
+
+
+
+    start -> pull_public_keys_and_user_ids;
+    pull_public_keys_and_user_ids -> display_userids;
+    display_userids -> user_input;
+    user_input -> load_distint_end_information[label="selected user"];
+    load_distint_end_information -> start_main_activity;
+
+
+
+}
