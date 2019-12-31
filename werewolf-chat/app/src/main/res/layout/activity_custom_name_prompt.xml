@@ -68,11 +68,6 @@
 
     </Button>
 
-    <Button
-        android:id="@+id/button_to_not_publish"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Continue to chat without publishing" />
 
     <Button
         android:id="@+id/generate_new_keys"

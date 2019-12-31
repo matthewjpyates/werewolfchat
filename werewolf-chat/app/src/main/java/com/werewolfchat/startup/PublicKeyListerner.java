@@ -1,5 +1,5 @@
 package com.werewolfchat.startup;
-
+/*
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -48,3 +48,4 @@ public class PublicKeyListerner implements ValueEventListener {
     }
 
 }
+*/

@@ -182,7 +182,7 @@
         android:textStyle="bold"
         android:layout_gravity="center_horizontal"
         android:justificationMode="inter_word"
-        android:text="Enter the private Server Hostname:" />
+        android:text="Enter the private Server URL:" />
 
 
     <EditText
@@ -195,73 +195,89 @@
 
     </EditText>
 
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_gravity="center_horizontal"
-        android:justificationMode="inter_word"
-        android:text="Enter the Server Port:" />
-
-    <EditText
-        android:id="@+id/private_server_port_input"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/above_proxy_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textNoSuggestions"
+        android:gravity="center"
+        android:orientation="horizontal">
 
-        >
+        <TextView
 
-    </EditText>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
+            android:text="                                      " />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_gravity="center_horizontal"
-        android:justificationMode="inter_word"
-        android:text="Enter the Server pass code (leave blank if none):" />
+        <TextView
 
-    <EditText
-        android:id="@+id/private_server_passcode_input"
+            android:layout_width="wrap_content"
+
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
+            android:text="Proxy Port" />
+
+
+    </LinearLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/the_other_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textNoSuggestions"
-        android:layout_above="@+id/private_sign_in_button">
+        android:gravity="center"
+        android:orientation="horizontal">
 
-    </EditText>
+        <Button
+            android:id="@+id/private_server_sign_in_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sign into Private Server" />
 
 
-    <Button
-        android:id="@+id/private_sign_in_button"
-        android:layout_width="wrap_content"
+        <EditText
+            android:id="@+id/private_server_proxy_port"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textNoSuggestions"
+
+
+            />
+
+    </LinearLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/proxy_info"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Use Private server"
-        android:layout_above="@+id/wcsbs_text" />
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
+            android:text="Leave proxy port empty if not using one, or if it is transparent." />
+
+
+    </LinearLayout>
 
 
     <TextView
-        android:id="@+id/wcsbs_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="16sp"
         android:textStyle="bold"
         android:layout_gravity="center_horizontal"
         android:justificationMode="inter_word"
-        android:text="AKA Werewolf Chat Simple Backend Server (WCSBS)" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:layout_gravity="center_horizontal"
-        android:justificationMode="inter_word"
-
-        android:text="Download the installer from\nhttps://github.com/matthewjpyates/wcsbs" />
+        android:text="Download the back  installer from\nhttps://github.com/matthewjpyates/wcsbs" />
 
 
 </LinearLayout>

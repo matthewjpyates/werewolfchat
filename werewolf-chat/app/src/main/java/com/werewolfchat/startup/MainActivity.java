@@ -69,6 +69,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 import static com.werewolfchat.startup.Utility.ENCRYPTION_PARAMS;
 import static com.werewolfchat.startup.Utility.dumb_debugging;
+import static com.werewolfchat.startup.Utility.makeGetStringForPublishingMessages;
 import static com.werewolfchat.startup.Utility.makeGetStringForPullingMessagesAfterTime;
 
 
@@ -153,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
     private Runnable queryCaller;
     private ExtrasManager extrasManager;
     private TokenManager tokenManager;
+
 
 
     public class PrivateServerAdapter extends RecyclerView.Adapter {
@@ -257,8 +259,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void sendMessageWithPrivateServer(String toid, String fromid, String message) {
 
-        //String queryStr = makeGetStringForPublishingMessages(this.serverUrl, toid, fromid, message,tokenManager.getTokenString());
-        String queryStr = Utility.makeGetStringForPullingMessagesWithToken(extrasManager.getPrivateServerURL(), extrasManager.getChatID(), tokenManager.getTokenString());
+        String queryStr = makeGetStringForPublishingMessages(this.serverUrl, toid, fromid, message, tokenManager.getTokenString());
+        //String queryStr = Utility.makeGetStringForPublishingMessages(extrasManager.getPrivateServerURL(), extrasManager.getChatID(), tokenManager.getTokenString());
+        dumb_debugging("about to try and send a message with this string\n" + queryStr);
         //String queryStr = makeGetStringForPublishingMessages(this.serverUrl, toid, fromid, message);
         Utility.queryURL(queryStr, this.queue, new GoodMessageSend(), new BadMessageSend());
     }
@@ -394,7 +397,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (!this.extrasManager.hasPrivateServerURL) {
             // No server has been set, launch the Sign In activity
-            startActivity(new Intent(this, SignInActivity.class));
+            extrasManager.setAutoPub(true);
+            startActivity(extrasManager.copyExtrasToNewIntent(new Intent(this, SignInActivity.class)));
             finish();
             return;
         } else if (!this.extrasManager.areAllTheLocalPKIExtrasSet()) {
@@ -402,6 +406,7 @@ public class MainActivity extends AppCompatActivity {
             // then we need to call the key management activity
 
 
+            extrasManager.setAutoPub(true);
             extrasManager.copyOverExtrasAndChangeClassToPrepareToStartNewActivity(MainActivity.this,
                     ConfigureKeysAndIDActivity.class);
 
@@ -490,6 +495,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+
+                extrasManager.setAutoPub(false);
                 extrasManager.copyOverExtrasAndChangeClassToPrepareToStartNewActivity(MainActivity.this,
                         ConfigureKeysAndIDActivity.class);
                 startActivity(extrasManager.getIntent());

@@ -81,9 +81,45 @@ public class TokenManager {
 
 
     public class GoodTokenPull implements Utility.Command {
+
+        public Utility.Command actionToTakeAfter;
+        public Utility.Command actionToTakeIfStringMathces;
+        public boolean runFollowOnAction;
+        public boolean runPreProssingCommand;
+        public String filterString;
+
+        public GoodTokenPull() {
+
+            runFollowOnAction = false;
+            runPreProssingCommand = false;
+        }
+
+        public GoodTokenPull(Utility.Command inputCommand) {
+            runFollowOnAction = true;
+            actionToTakeAfter = inputCommand;
+            runPreProssingCommand = false;
+        }
+
+        public GoodTokenPull(Utility.Command inputCommand, String inputStr, Utility.Command actionToTakeIfStringMathcesInput) {
+            runFollowOnAction = true;
+            actionToTakeAfter = inputCommand;
+            runPreProssingCommand = true;
+            filterString = inputStr;
+            actionToTakeIfStringMathces = actionToTakeIfStringMathcesInput;
+        }
+
         public void execute(String data) {
             requestInProgress = false;
             dumb_debugging("in good token pull right now with this data:\n" + data);
+
+            if (runPreProssingCommand) {
+                if (data.matches(filterString)) {
+                    isSet = false;
+                    actionToTakeIfStringMathces.execute(data);
+                    return;
+                }
+            }
+
 
             if (data.equals("fail: user not found")) {
                 isSet = false;
@@ -113,6 +149,12 @@ public class TokenManager {
                     dumb_debugging("the decrypted key is good");
                     isSet = true;
                     tokenString = newTokenString;
+                    if (runFollowOnAction) {
+                        dumb_debugging("about to try to run follow on action");
+                        actionToTakeAfter.execute(data + "%" + newTokenString);
+                    }
+
+
                 } else {
                     dumb_debugging("the decrypted key was the wrong format");
                     isSet = false;
@@ -173,6 +215,35 @@ public class TokenManager {
         queryURL(getNewTokenUrl, passedInQueue, new FeedBackWrapperForTokenPulls(feedbackWorker, new GoodTokenPull()), new FeedBackWrapperForTokenPulls(feedbackWorker, new BadTokenPull()));
 
     }
+
+    public void getNewTokenThenExecuteCommand(RequestQueue passedInQueue, Utility.Command followOnTask) {
+        if (this.requestInProgress) {
+            dumb_debugging("request cancelled since one is already being sent");
+            return;
+        }
+        isSet = false;
+        requestInProgress = true;
+        String getNewTokenUrl = Utility.makeGetStringForPullingNewToken(this.serverURL, this.userId);
+        dumb_debugging("about to request new token with \n" + getNewTokenUrl);
+
+        queryURL(getNewTokenUrl, passedInQueue, new GoodTokenPull(followOnTask), new BadTokenPull());
+
+    }
+
+
+    public void getNewTokenThenExecuteCommandWithPrepossingCommandIfStringMatches(RequestQueue passedInQueue, Utility.Command followOnTask,
+                                                                                  String stringToMatch, Utility.Command taskToRun) {
+
+
+        isSet = false;
+        requestInProgress = true;
+        String getNewTokenUrl = Utility.makeGetStringForPullingNewToken(this.serverURL, this.userId);
+        dumb_debugging("about to request new token with \n" + getNewTokenUrl);
+
+        queryURL(getNewTokenUrl, passedInQueue, new GoodTokenPull(followOnTask, stringToMatch, taskToRun), new BadTokenPull());
+
+    }
+
 
 
     public void loadTokenOffline(String passedInToken) {

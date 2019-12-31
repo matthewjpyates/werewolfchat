@@ -104,10 +104,19 @@
             ads:adSize="BANNER"
             android:layout_below="@+id/linearLayout2"
 
-            ads:adUnitId="ca-app-pub-7947382408011370/3809869453 "></com.google.android.gms.ads.AdView>
+            ads:adUnitId="ca-app-pub-3940256099942544/6300978111"></com.google.android.gms.ads.AdView>
     </LinearLayout>
 
 
-    <!--ads:adUnitId="ca-app-pub-7947382408011370/6211837365"-->
+    <!--
+
+    testing add id
+    ca-app-pub-3940256099942544/6300978111-->
+
+    <!--ca-app-pub-7947382408011370/3809869453 -->
+
+    <!--
+    real add id
+    ads:adUnitId="ca-app-pub-7947382408011370/6211837365"-->
 
 </RelativeLayout>

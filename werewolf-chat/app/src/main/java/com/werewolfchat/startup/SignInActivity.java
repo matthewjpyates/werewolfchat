@@ -199,6 +199,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
             if (proxyPort > 0) {
                 extrasManager.setProxyPort(proxyPort);
             }
+            extrasManager.setAutoPub(true);
             startActivity(extrasManager.getIntent());
             finish();
         } else {
@@ -283,6 +284,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 extrasManager.setProxyPort(proxyPortNum);
             }
             extrasManager.setPrivateServerURL(hostname);
+            extrasManager.setAutoPub(true);
             startActivity(extrasManager.getIntent());
             finish();
         } else {

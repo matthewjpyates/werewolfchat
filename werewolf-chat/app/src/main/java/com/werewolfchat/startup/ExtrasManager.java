@@ -65,10 +65,15 @@ public class ExtrasManager {
             case TOKEN_STR:
                 setTokenString((String) valueToSet);
                 break;
-
+            case AUTO_PUB_STR:
+                setAutoPub((boolean) valueToSet);
         }
     }
 
+    public void setAutoPub(boolean input) {
+        this.autoPub = input;
+        this.intent.putExtra(AUTO_PUB_STR, input);
+    }
         public Intent getIntent() {
             return intent;
         }
@@ -257,10 +262,11 @@ public class ExtrasManager {
         public static final String TIME_OUT_EXTRA = "time_out";
         public static final String USING_SELF_SIGNED_TLS_CERT_EXTRA = "use_self_signed_cert";
     public static final String TOKEN_STR = "token_str";
+    public static final String AUTO_PUB_STR = "auto_pub";
 
         public boolean hasPrivateServerURL, hasDistEndID, hasDistEndKey, hasPublicKey, hasPrivateKey;
         public boolean hasChatID, hasFirebaseUID, hasFirebaseEmail, hasProxyPort, hasTimeOut, usingselfSignedCert;
-    public boolean hasTokenString;
+    public boolean hasTokenString, autoPub;
 
 
         public void setBoolsToFalse()
@@ -277,6 +283,7 @@ public class ExtrasManager {
             this.hasTimeOut = false;
             this.usingselfSignedCert = false;
             this.hasTokenString = false;
+            this.autoPub = false;
         }
 
 
@@ -307,6 +314,8 @@ public class ExtrasManager {
                 this.usingselfSignedCert = true;
             if (this.intent.hasExtra(TOKEN_STR))
                 this.setTokenString(this.intent.getStringExtra(TOKEN_STR));
+            if (this.intent.hasExtra(AUTO_PUB_STR))
+                this.autoPub = this.intent.getBooleanExtra(AUTO_PUB_STR, false);
         }
 
 
@@ -332,6 +341,7 @@ public class ExtrasManager {
             this.extraStrings.add(TIME_OUT_EXTRA);
             this.extraStrings.add(USING_SELF_SIGNED_TLS_CERT_EXTRA);
             this.extraStrings.add(TOKEN_STR);
+            this.extraStrings.add(AUTO_PUB_STR);
         }
 
         public void  wipeIntent()

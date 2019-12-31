@@ -12,11 +12,6 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.RequestQueue;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.werewolfchat.startup.ntru.encrypt.EncryptionKeyPair;
 import com.werewolfchat.startup.ntru.encrypt.EncryptionParameters;
 import com.werewolfchat.startup.ntru.encrypt.NtruEncrypt;
@@ -27,12 +22,15 @@ import com.werewolfchat.startup.ntru.util.ArrayEncoder;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.werewolfchat.startup.Utility.dumb_debugging;
 import static com.werewolfchat.startup.Utility.queryURL;
-import static com.werewolfchat.startup.ntru.util.ArrayEncoder.bytesToHex;
+
+/*import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;*/
 
 //import android.support.v7.app.AppCompatActivity;
 
@@ -67,13 +65,41 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
     private RequestQueue queue;
     private ExtrasManager extrasManager;
     private TokenManager tokenManager;
+    private boolean keyWasFound;
 
+
+    public class FeedbackWoker implements Utility.Command {
+        public void execute(String data) {
+            if (data.startsWith("good:")) {
+                setGoodNews("token pull is working");
+            } else {
+                setError(data);
+            }
+        }
+    }
+
+
+    public class VerifyKeysAfterGettingThemWorker implements Utility.Command {
+
+
+        public void execute(String data) {
+            dumb_debugging("At 1stposition");
+            extrasManager.setPubKey(encKP.getPublic().getEncoded());
+            extrasManager.setPrivKey(encKP.getPrivate().getEncoded());
+            extrasManager.setPrivateServerURL(privateServerURL);
+            extrasManager.setChatID(werewolfChatId);
+            verifyKeys();
+        }
+    }
 
 
     //CountDownLatch latch;
 
 
     public void lookupOrGenerateKeys() {
+        dumb_debugging("3 autopub is " + (this.extrasManager.autoPub ? "true" : "false"));
+
+        keyWasFound = false;
         //see if they have a key pair file on file for this firebase uuid
         String localPath = this.getFilesDir() + "/chat.key";
         File internalStorage = this.getFilesDir();
@@ -107,8 +133,16 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
             this.extrasManager.setChatID(this.werewolfChatId);
             this.extrasManager.loadKeyPair(encKP);
             this.tokenManager = this.extrasManager.makeNewTokenManager();
-            this.tokenManager.getNewToken(this.queue);
-            this.setError("unable to get auth token for keyfile");
+            //this.tokenManager.getNewToken(this.queue);
+            if (this.extrasManager.autoPub) {
+                dumb_debugging("At 2ndposition in lookup keys with autopub set");
+                this.extrasManager.setAutoPub(false);
+                this.tokenManager.getNewTokenThenExecuteCommand(this.queue, new VerifyKeysAfterGettingThemWorker());
+
+            }
+
+            //this.setError("unable to get auth token for keyfile");
+            keyWasFound = true;
         } else {
 
 
@@ -126,6 +160,15 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
             //update_id(Utility.makeRandomString());
             update_id_field_without_publishing(this.extrasManager.getChatID());
             this.setGoodNews("Keys generated");
+            if (this.extrasManager.autoPub) {
+                dumb_debugging("At 2ndposition_other in lookup keys with autopub set");
+                this.setGoodNews("Publishing new keys");
+                this.extrasManager.setAutoPub(false);
+                publish_private_server_info();
+                //this.tokenManager.getNewTokenThenExecuteCommand(this.queue, new VerifyKeysAfterGettingThemWorker());
+
+            }
+
 
 
         }
@@ -176,51 +219,7 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
 
 
 
-    //TODO make a more OOP way to handle proxies so I dont have identical code in multiple classes
-    //proxy methods
-/*
-    private boolean isUsingProxy;
-    private int proxy_port;
-    private int timeOut;
-    private void loadProxySettings(Intent intent)
-    {
-        if(isTheProxyPortExtraNull(intent))
-        {
-            proxy_port = -1;
-            isUsingProxy = false;
-            dumb_debugging("no proxy ports");
-        }
-        else
-        {
-            proxy_port = getProxyPortFromIntent(intent);
-            isUsingProxy = true;
-            timeOut = getTimeOutFromIntnet(intent);
 
-            dumb_debugging("loading proxy port "+proxy_port+" in main activity");
-        }
-    }
-
-    public Intent addProxyToIntentIfInUse(Intent intent)
-    {
-        if(this.isUsingProxy) {
-            intent = addProxyToIntent(intent, this.proxy_port);
-            if(this.timeOut>0)
-                intent = addTimeOutToIntent(intent, this.timeOut);
-        }
-
-        return intent;
-    }
-
-    public void makeVolley()
-    {
-        loadProxySettings(this.getIntent());
-        if(this.isUsingProxy)
-            this.queue = Volley.newRequestQueue(this, new ProxiedHurlStack(this.proxy_port));
-        else
-            this.queue = Volley.newRequestQueue(this);
-
-    }
-*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -230,10 +229,13 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
         //this.latch = new CountDownLatch(1);
         this.isTheIdGood = false;
         //this.queue = Volley.newRequestQueue(this);
+        keyWasFound = false;
 
         Intent theIntent = this.getIntent();
         this.extrasManager = new ExtrasManager( theIntent);
 
+
+        dumb_debugging("1 autopub is " + (this.extrasManager.autoPub ? "true" : "false"));
 
         this.usingPrivateServer = true;
         privateServerURL = this.extrasManager.getPrivateServerURL();
@@ -246,21 +248,25 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
         wipe_local_keys_button.setOnClickListener(this);
         set_id_button = (Button) findViewById(R.id.button_to_set_id);
         publish_button = (Button) findViewById(R.id.button_to_publish_info);
-        dont_publish_button = (Button) findViewById(R.id.button_to_not_publish);
+        //dont_publish_button = (Button) findViewById(R.id.button_to_not_publish);
         set_id_button.setOnClickListener(this);
         publish_button.setOnClickListener(this);
-        dont_publish_button.setOnClickListener(this);
+        //dont_publish_button.setOnClickListener(this);
         this.loadingView = (TextView) findViewById(R.id.Loading_status);
         this.loadingImg = (ImageView) findViewById(R.id.loading_img);
         this.chatIDView = (TextView) findViewById(R.id.generated_ID);
         this.idInput = (EditText) findViewById(R.id.editTextDialogUserInput);
 
 
-
-
-
+        dumb_debugging("2 autopub is " + (this.extrasManager.autoPub ? "true" : "false"));
 
         lookupOrGenerateKeys();
+
+        /*if(this.extrasManager.autoPub)
+        {
+            dumb_debugging("auto pub is set");
+            this.publishKeyWrapper();
+        }*/
 
     }
 
@@ -279,12 +285,12 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
                 makeNewKeys();
                 break;
 
-            case R.id.button_to_not_publish:
+            /*case R.id.button_to_not_publish:
                 this.save_key_info_without_publishing();
                 this.setkeyStringsFile();
                 startActivity(makeIntentWithKeys());
                 finish();
-                return;
+                return;*/
         }
     }
 
@@ -312,12 +318,8 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
 
 
     public void publishKeyWrapper() {
-        if (this.usingPrivateServer) {
             this.publish_private_server_info();
-        } else {
-            this.publish_key_info();
 
-        }
 
     }
 
@@ -338,6 +340,7 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
             } else if (data.equals("chatid changed")) {
                 werewolfChatId = this.newID;
                 dumb_debugging("changing chatid after server");
+
                 return;
             } else {
                 publish_button.setText("server error");
@@ -357,7 +360,10 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
 
     public class VerifyPubKeyGood implements Utility.Command {
         public void execute(String data) {
+            dumb_debugging("in VerifyPubKeyGood with this value: " + data);
+
             if (data.startsWith("fail:")) {
+                dumb_debugging("in VerifyPubKeyGood with this value: ");
                 publish_button.setText("Key Verification Failed");
                 return;
             }
@@ -370,6 +376,18 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
     }
 
 
+    public void verifyKeys() {
+        isTheIdGood = true;
+        publish_button.setText("Verifying Key File");
+        dumb_debugging("about to try to verify the key file");
+        dumb_debugging("going to use this token " + tokenManager.getTokenString());
+
+        Utility.queryURL(Utility.makeVerifyKeyURL(extrasManager.getPrivateServerURL(),
+                extrasManager.getChatID(), tokenManager.getTokenString()),
+                queue, new VerifyPubKeyGood(), new VerifyPubKeyFail());
+        return;
+    }
+
     public class VerifyPubKeyFail implements Utility.Command {
         public void execute(String data) {
             publish_button.setText("Key Verification Failed");
@@ -380,7 +398,7 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
 
     public class PubKeyPublishGoodResultCommand implements Utility.Command {
         public void execute(String data) {
-            if (data.equals("chatidtaken") && !isTheIdGood) {
+            if (data.equals("fail:chatidtaken") && !isTheIdGood) {
                 publish_button.setText("ID taken, can't publish, choose new id");
                 return;
             } else if (data.startsWith("fail:")) {
@@ -394,12 +412,7 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
 
                 if (tokenManager.isTokenSet()) {
 
-                    isTheIdGood = true;
-                    publish_button.setText("Verifying Key File");
-                    Utility.queryURL(Utility.makeVerifyKeyURL(extrasManager.getPrivateServerURL(),
-                            extrasManager.getChatID(), tokenManager.getTokenString()),
-                            queue, new VerifyPubKeyGood(), new VerifyPubKeyFail());
-                    return;
+                    verifyKeys();
                 } else {
                     publish_button.setText("Received a bad token");
                     return;
@@ -429,141 +442,62 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
         extrasManager.setPrivKey(this.encKP.getPrivate().getEncoded());
         extrasManager.setPrivateServerURL(this.privateServerURL);
         extrasManager.setChatID(this.werewolfChatId);
-        Utility.queryURL(queryStr, this.queue, new PubKeyPublishGoodResultCommand(), new PubKeyPublishBadResultCommand());
+        if (keyWasFound && tokenManager.isTokenSet()) {
+            dumb_debugging("about to try to verfiy keys");
+            verifyKeys();
+        } else {
+            Utility.queryURL(queryStr, this.queue, new PubKeyPublishGoodResultCommand(), new PubKeyPublishBadResultCommand());
+        }
         return;
     }
 
-    public void update_id_private_server(String chatId) {
-        this.isTheIdGood = false;
-        if (this.tokenManager == null) {
-            dumb_debugging("the token manager was null when I tried to update my id");
+
+    public class TaskToRunIfNoPubKeyWasFoundWhenTryingToChangeId implements Utility.Command {
+
+        public String newID;
+
+        public TaskToRunIfNoPubKeyWasFoundWhenTryingToChangeId(String newIDinput) {
+            newID = newIDinput;
+        }
+
+        // if no public key was found on the server, then it has never been published so we can just publish with the new id
+        public void execute(String data) {
+            werewolfChatId = newID;
+            extrasManager.setChatID(newID);
+            publish_private_server_info();
+        }
+    }
+
+    public class ChangeIDTasker implements Utility.Command {
+        public String newID;
+
+        public ChangeIDTasker(String newIDinput) {
+            newID = newIDinput;
+        }
+
+        public void execute(String data) {
+            String queryStr = Utility.makeGetStringForChangingChatID(extrasManager.getPrivateServerURL(), werewolfChatId, newID, tokenManager.getTokenString());
+            dumb_debugging("about to query the  server with this string:\n" + queryStr);
+            queryURL(queryStr, queue, new ChangeIDGoodResult(newID), new ChangeIDFail());
+        }
+    }
+
+    public void update_id(String chatId) {
+
             this.extrasManager.setChatID(this.werewolfChatId);
             this.tokenManager = this.extrasManager.makeNewTokenManager();
-            this.tokenManager.getNewToken(this.queue);
-            this.setGoodNews("authenticating with server");
-            return;
-        } else if (!this.tokenManager.isTokenSet()) {
-            dumb_debugging("the token manager was not ready to give a token");
-            if (this.queue == null)
-                this.queue = this.extrasManager.makeVolley(this);
-            this.tokenManager.getNewToken(this.queue);
-            this.setGoodNews("authenticating with server");
-            return;
-        } else {
+        this.tokenManager.getNewTokenThenExecuteCommandWithPrepossingCommandIfStringMatches(this.queue, new ChangeIDTasker(chatId),
+                "fail:public_key_not_found", new TaskToRunIfNoPubKeyWasFoundWhenTryingToChangeId(chatId));
+        this.setGoodNews("trying to change ID");
 
-            String queryStr = Utility.makeGetStringForChangingChatID(this.extrasManager.getPrivateServerURL(), this.werewolfChatId, chatId, this.tokenManager.getTokenString());
-            dumb_debugging("about to query the  server with this string:\n" + queryStr);
-            queryURL(queryStr, this.queue, new ChangeIDGoodResult(chatId), new ChangeIDFail());
-
-        }
-
-        //this.werewolfChatId = chatId;
-        //this.chatIDView.setText(chatId);
-        return;
     }
 
-    public void update_id(String newID) {
-        //latch = new CountDownLatch(1);
-        if (this.usingPrivateServer) {
+    /*public void update_id(String newID) {
+
+
             Utility.dumb_debugging("checking private server id");
             update_id_private_server(newID);
-            return;
-        }
 
-        this.isTheIdGood = false;
-        this.isThisIdTaken(newID);
+    }*/
 
-        this.werewolfChatId = newID;
-        this.chatIDView.setText(newID);
-
-        return;
-    }
-
-    //TODO check to see if chat id taken
-    private void publish_key_info() {
-
-        Utility.dumb_debugging("publishing key to firebase");
-
-
-        Map<String, WerewolfChatPublicKey> mapForUpload = new HashMap<>();
-        mapForUpload.put(this.passed_in_uid, new WerewolfChatPublicKey(this.werewolfChatId,
-                ArrayEncoder.bytesToHex(this.encKP.getPublic().getEncoded())));
-
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
-
-        Utility.dumb_debugging("public keys child: " + PUBLIC_KEYS_CHILD);
-        Utility.dumb_debugging("passed in uuid: " + passed_in_uid);
-        DatabaseReference pubKeyRef = ref.child(PUBLIC_KEYS_CHILD).child(this.passed_in_uid);
-
-        pubKeyRef.setValue(new WerewolfChatPublicKey(this.werewolfChatId,
-                ArrayEncoder.bytesToHex(this.encKP.getPublic().getEncoded())));
-
-
-        this.setkeyStringsFile();
-        startActivity(makeIntentWithKeys());
-        finish();
-        return;
-    }
-
-    public void save_key_info_without_publishing() {
-        String file_location = "Saving Keys to " + this.werewolfChatId + ".pubkey";
-        this.loadingView.setText(file_location);
-        Utility.writeToFile(bytesToHex(this.encKP.getPublic().getEncoded()), this,
-                this.werewolfChatId + ".pubkey");
-        file_location = "File Saved at " + this.werewolfChatId + ".pubkey";
-        this.loadingView.setText(file_location);
-        return;
-    }
-
-
-    public void isThisIdTaken(String idToCheck) {
-        isTheIdGood = false;
-        publish_button.setText("Checking Id to see if taken");
-        DatabaseReference queryRef = FirebaseDatabase.getInstance().getReference().child("public_keys");
-        final String finalStringToCheck = idToCheck;
-
-
-        queryRef.orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
-
-
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                if (dataSnapshot.getChildrenCount() == 0) {
-
-                    Utility.dumb_debugging("No public users found on the database, so the ide must not be taken");
-                    publish_button.setText(publishButtonText);
-                    isTheIdGood = true;
-
-                    return;
-
-                } else {
-                    Utility.dumb_debugging(Long.toString(dataSnapshot.getChildrenCount()));
-
-                    for (DataSnapshot row : dataSnapshot.getChildren()) {
-                        Utility.dumb_debugging(row.getKey());
-                        //pubKeyArray.add((WerewolfChatPublicKey)row.getValue());
-                        if (finalStringToCheck.equals((String) row.child("chat_id").getValue())) {
-                            isTheIdGood = false;
-                            setError("the id is taken, change id");
-                            publish_button.setText("ID taken, can't publish, choose new id");
-                            return;
-                        }
-                    }
-                    isTheIdGood = true;
-                    publish_button.setText(publishButtonText);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // Getting Post failed, log a message
-                Utility.dumb_debugging("queryPublicKeys:onCancelled" + databaseError.toString());
-                setError("could not contact database to check id, try again");
-
-            }
-        });
-
-
-    }
 }
