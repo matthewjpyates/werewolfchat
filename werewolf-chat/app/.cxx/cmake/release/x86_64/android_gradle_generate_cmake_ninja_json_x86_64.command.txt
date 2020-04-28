@@ -1,0 +1,14 @@
+Executable : /home/lcdr_data/Android/Sdk/cmake/3.6.4111459/bin/cmake
+arguments : 
+-H/home/lcdr_data/gits/liboqs/liboqs-cpp
+-B/home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/x86_64
+-DANDROID_ABI=x86_64
+-DANDROID_PLATFORM=android-21
+-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/build/intermediates/cmake/release/obj/x86_64
+-DCMAKE_BUILD_TYPE=Release
+-DANDROID_NDK=/home/lcdr_data/Android/Sdk/ndk/20.1.5948944
+-DCMAKE_TOOLCHAIN_FILE=/home/lcdr_data/Android/Sdk/ndk/20.1.5948944/build/cmake/android.toolchain.cmake
+-DCMAKE_MAKE_PROGRAM=/home/lcdr_data/Android/Sdk/cmake/3.6.4111459/bin/ninja
+-GAndroid Gradle - Ninja
+jvmArgs : 
+

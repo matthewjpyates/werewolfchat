@@ -1,0 +1,5 @@
+/home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/armeabi-v7a/CMakeFiles/edit_cache.dir
+/home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/armeabi-v7a/CMakeFiles/rebuild_cache.dir
+/home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/armeabi-v7a/CMakeFiles/sig.dir
+/home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/armeabi-v7a/CMakeFiles/rand.dir
+/home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/armeabi-v7a/CMakeFiles/kem.dir

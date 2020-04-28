@@ -1,0 +1,74 @@
+
+{
+	"buildFiles" : [ "/home/lcdr_data/gits/liboqs/liboqs-cpp/CMakeLists.txt" ],
+	"cleanCommands" : 
+	[
+		"/home/lcdr_data/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/x86_64 --target clean"
+	],
+	"cppFileExtensions" : [ "cpp" ],
+	"libraries" : 
+	{
+		"kem-Release-x86_64" : 
+		{
+			"abi" : "x86_64",
+			"artifactName" : "kem",
+			"buildCommand" : "/home/lcdr_data/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/x86_64 --target kem",
+			"buildType" : "release",
+			"files" : 
+			[
+				
+				{
+					"flags" : "  --target=x86_64-none-linux-android21 --gcc-toolchain=/home/lcdr_data/Android/Sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/linux-x86_64 --sysroot=/home/lcdr_data/Android/Sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/linux-x86_64/sysroot   -I/home/lcdr_data/gits/liboqs/liboqs-cpp/include -isystem /usr/local/include  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -fno-addrsig -Wa,--noexecstack -Wformat -Werror=format-security   -pedantic -Wall -Wextra -Weffc++ -O2 -DNDEBUG  -fPIE   -std=gnu++11  -c ",
+					"src" : "/home/lcdr_data/gits/liboqs/liboqs-cpp/examples/kem.cpp",
+					"workingDirectory" : "/home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/x86_64"
+				}
+			],
+			"output" : "/home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/x86_64/kem",
+			"toolchain" : "9227737533176835543"
+		},
+		"rand-Release-x86_64" : 
+		{
+			"abi" : "x86_64",
+			"artifactName" : "rand",
+			"buildCommand" : "/home/lcdr_data/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/x86_64 --target rand",
+			"buildType" : "release",
+			"files" : 
+			[
+				
+				{
+					"flags" : "  --target=x86_64-none-linux-android21 --gcc-toolchain=/home/lcdr_data/Android/Sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/linux-x86_64 --sysroot=/home/lcdr_data/Android/Sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/linux-x86_64/sysroot   -I/home/lcdr_data/gits/liboqs/liboqs-cpp/include -isystem /usr/local/include  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -fno-addrsig -Wa,--noexecstack -Wformat -Werror=format-security   -pedantic -Wall -Wextra -Weffc++ -O2 -DNDEBUG  -fPIE   -std=gnu++11  -c ",
+					"src" : "/home/lcdr_data/gits/liboqs/liboqs-cpp/examples/rand.cpp",
+					"workingDirectory" : "/home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/x86_64"
+				}
+			],
+			"output" : "/home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/x86_64/rand",
+			"toolchain" : "9227737533176835543"
+		},
+		"sig-Release-x86_64" : 
+		{
+			"abi" : "x86_64",
+			"artifactName" : "sig",
+			"buildCommand" : "/home/lcdr_data/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/x86_64 --target sig",
+			"buildType" : "release",
+			"files" : 
+			[
+				
+				{
+					"flags" : "  --target=x86_64-none-linux-android21 --gcc-toolchain=/home/lcdr_data/Android/Sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/linux-x86_64 --sysroot=/home/lcdr_data/Android/Sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/linux-x86_64/sysroot   -I/home/lcdr_data/gits/liboqs/liboqs-cpp/include -isystem /usr/local/include  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -fno-addrsig -Wa,--noexecstack -Wformat -Werror=format-security   -pedantic -Wall -Wextra -Weffc++ -O2 -DNDEBUG  -fPIE   -std=gnu++11  -c ",
+					"src" : "/home/lcdr_data/gits/liboqs/liboqs-cpp/examples/sig.cpp",
+					"workingDirectory" : "/home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/x86_64"
+				}
+			],
+			"output" : "/home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/x86_64/sig",
+			"toolchain" : "9227737533176835543"
+		}
+	},
+	"toolchains" : 
+	{
+		"9227737533176835543" : 
+		{
+			"cCompilerExecutable" : "/home/lcdr_data/Android/Sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/linux-x86_64/bin/clang",
+			"cppCompilerExecutable" : "/home/lcdr_data/Android/Sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++"
+		}
+	}
+}

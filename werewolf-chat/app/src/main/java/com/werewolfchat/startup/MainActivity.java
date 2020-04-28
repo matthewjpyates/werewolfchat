@@ -74,7 +74,7 @@ import static com.werewolfchat.startup.Utility.makeGetStringForPullingMessagesAf
 
 
 public class MainActivity extends AppCompatActivity {
-    private static final SignatureParameters SIGNATURE_PARAMS = SignatureParameters.APR2011_439_PROD;
+    //private static final SignatureParameters SIGNATURE_PARAMS = SignatureParameters.APR2011_439_PROD;
     NtruEncrypt ntruEnc;
     NtruSign ntruSig;
 

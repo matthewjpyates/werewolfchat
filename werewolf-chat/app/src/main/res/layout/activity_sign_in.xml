@@ -12,16 +12,33 @@
         android:textSize="30sp"
         android:textStyle="bold"
         android:layout_gravity="center_horizontal"
-        android:text="Sign in with the Public Server"/>
+    android:text="Choose how to connect"
+        />
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/heading_layout"
+        android:id="@+id/connetion_type_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal">
+        <TextView
+            android:id="@+id/connetion_type_text"
 
-    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
+            android:text="Connection type "
+            />
+        <Spinner
+            android:id="@+id/network_spinner"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+ <!--   <TextView
         android:id="@+id/signin_text"
 
         android:layout_width="wrap_content"
@@ -51,233 +68,91 @@
             android:layout_gravity="center_horizontal"
             android:text="Proxy Port"
             />
+-->
 
-    </LinearLayout>
-    <TextView
+    <!--<TextView
 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="14sp"
         android:textStyle="bold"
         android:layout_gravity="center_horizontal"
-        android:text="Leave proxy port empty if not using one, or if it is transparent."/>
+        android:text="Leave proxy port empty if not using one, or if it is transparent."/> -->
 
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/https_button"
+        android:id="@+id/url_display"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal">
-    <Button
-        android:id="@+id/https_sign_in_button"
-        android:layout_width="wrap_content"
+
+        <EditText
+            android:id="@+id/server_url_field"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textNoSuggestions"
+            />
+
+
+    </LinearLayout>
+
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/proxy_type_layout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Sign in over https" />
+        android:gravity="center"
+        android:orientation="horizontal">
         <TextView
+            android:id="@+id/proxy_type_text"
 
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="30sp"
             android:textStyle="bold"
             android:layout_gravity="center_horizontal"
-            android:text="       "/>
+            android:text="Proxy type "
+            />
+        <Spinner
+            android:id="@+id/proxy_spinner"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/proxy_display"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
 
         <EditText
-            android:id="@+id/https_edit_text"
+            android:id="@+id/proxy_url_field"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textNoSuggestions"
-
-
             />
 
 
     </LinearLayout>
 
+
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/tor_button"
+        android:id="@+id/sign_in_button_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal">
     <Button
-        android:id="@+id/tor_sign_in_button"
+        android:id="@+id/sign_in_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Sign in over TOR" />
-        <TextView
-
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="30sp"
-            android:textStyle="bold"
-            android:layout_gravity="center_horizontal"
-            android:text="         "/>
-
-        <EditText
-            android:id="@+id/tor_edit_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textNoSuggestions"
-            android:text="9050"
-            />
-
+        android:text="Connect to Chat" />
 
     </LinearLayout>
-
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/i2p_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-    <Button
-        android:id="@+id/i2p_sign_in_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Sign in over I2P" />
-
-        <TextView
-
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="30sp"
-            android:textStyle="bold"
-            android:layout_gravity="center_horizontal"
-            android:text="          "/>
-
-        <EditText
-            android:id="@+id/i2p_edit_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textNoSuggestions"
-            android:text="4444"
-
-            />
-
-
-    </LinearLayout>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="35sp"
-        android:textStyle="bold"
-        android:layout_gravity="center_horizontal"
-        android:text="----OR----" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        android:layout_gravity="center_horizontal"
-        android:text="Sign in to Private Server" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_gravity="center_horizontal"
-        android:justificationMode="inter_word"
-        android:text="Enter the private Server URL:" />
-
-
-    <EditText
-        android:id="@+id/private_server_url_input"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textNoSuggestions"
-
-        >
-
-    </EditText>
-
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/above_proxy_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-        <TextView
-
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:layout_gravity="center_horizontal"
-            android:text="                                      " />
-
-        <TextView
-
-            android:layout_width="wrap_content"
-
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:layout_gravity="center_horizontal"
-            android:text="Proxy Port" />
-
-
-    </LinearLayout>
-
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/the_other_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/private_server_sign_in_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sign into Private Server" />
-
-
-        <EditText
-            android:id="@+id/private_server_proxy_port"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textNoSuggestions"
-
-
-            />
-
-    </LinearLayout>
-
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/proxy_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-        <TextView
-
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:layout_gravity="center_horizontal"
-            android:text="Leave proxy port empty if not using one, or if it is transparent." />
-
-
-    </LinearLayout>
-
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:layout_gravity="center_horizontal"
-        android:justificationMode="inter_word"
-
-        android:text="Download the back  installer from\nhttps://github.com/matthewjpyates/wcsbs" />
 
 
 </LinearLayout>

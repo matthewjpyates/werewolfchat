@@ -19,14 +19,19 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import static com.werewolfchat.startup.Utility.cleanServerResults;
 import static com.werewolfchat.startup.Utility.convertStringToPortNumberOrReturnNegitiveOneIfNotGoodInput;
 import static com.werewolfchat.startup.Utility.dumb_debugging;
 import static com.werewolfchat.startup.Utility.isServerReachable;
+import static com.werewolfchat.startup.Utility.isStringAValidHostnameColonPortNumber;
 
 // fixing this is so frustrating
 //import android.support.v7.app.AppCompatActivity;
@@ -45,21 +50,19 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
 
 
-    private Button privateServerButton;
-
-    private Button httpsServerButton;
-    private Button torServerButton;
-    private Button i2pServerButton;
-
-
-    private EditText privateServerInput;
-    private EditText privateServerProxyPortInput;
+    private Button connectButton;
 
 
 
-    private EditText httpsProxyPortTextField;
-    private EditText torProxyPortTextField;
-    private EditText i2pProxyPortTextField;
+    private EditText urlTextField;
+    private EditText proxyTextField;
+
+    private Spinner networkSpinner;
+    private Spinner proxySpinner;
+    private ArrayAdapter<CharSequence> networkAdapter;
+    private ArrayAdapter<CharSequence> proxyAdapter;
+
+
 
 
     @Override
@@ -71,53 +74,133 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         this.extrasManager = new ExtrasManager(this.getIntent());
 
 
+        //build spinners
+        networkSpinner = (Spinner) findViewById(R.id.network_spinner);
+        proxySpinner = (Spinner) findViewById(R.id.proxy_spinner);
+
+        //add values to adapters for spinners
+        networkAdapter = ArrayAdapter.createFromResource(this,R.array.network_array, android.R.layout.simple_spinner_item);
+        proxyAdapter = ArrayAdapter.createFromResource(this,R.array.proxy_array, android.R.layout.simple_spinner_item);
+
+        // Specify the layout to use when the list of choices appears
+        networkAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        proxyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // Apply the adapters to the spinners
+        networkSpinner.setAdapter(networkAdapter);
+        proxySpinner.setAdapter(proxyAdapter);
+
+        // set defaults for the spinnners
+        networkSpinner.setSelection(networkAdapter.getPosition("HTTPS"));
+        proxySpinner.setSelection(proxyAdapter.getPosition("None"));
+
+        // add the class as the on selceted listener
+        networkSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String networkType = (String) networkAdapter.getItem(position);
+                switch (networkType)
+                {
+                    case "HTTPS":
+                        urlTextField.setText("https://" + Utility.httpsAddress + "/api/");
+                        proxySpinner.setSelection(proxyAdapter.getPosition("None"));
+                        proxyTextField.setText("");
+                        break;
+                    case "TOR":
+                        urlTextField.setText("http://" + Utility.torAddress + "/api/");
+                        proxySpinner.setSelection(proxyAdapter.getPosition("SOCKS"));
+                        proxyTextField.setText("localhost:9050");
+                        break;
+                    case "I2P":
+                        urlTextField.setText("http://" + Utility.i2pAddress + "/api/");
+                        proxySpinner.setSelection(proxyAdapter.getPosition("HTTP"));
+                        proxyTextField.setText("localhost:4444");
+                        break;
+                    case "Custom":
+                        urlTextField.setText("enter your server's url here");
+                        proxySpinner.setSelection(proxyAdapter.getPosition("None"));
+                        proxyTextField.setText("");
+                        break;
+                    default:
+                        urlTextField.setText("");
+                        proxySpinner.setSelection(proxyAdapter.getPosition("None"));
+                        proxyTextField.setText("");
+                        break;
+
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> arg0) {
+            }
+        });
+        proxySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String proxyType = (String) proxyAdapter.getItem(position);
+                switch (proxyType)
+                {
+                    case "SOCKS":
+                        proxyTextField.setText("localhost:9050");
+
+                        break;
+                    case "HTTP":
+
+                        proxyTextField.setText("localhost:4444");
+                        break;
+                    case "None":
+                        proxyTextField.setText("");
+                        break;
+                    default:
+                        proxyTextField.setText("");
+                        break;
+
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> arg0) {
+            }
+        });
+
+
         // add private server button
-        privateServerButton = (Button) findViewById(R.id.private_server_sign_in_button);
+        connectButton = (Button) findViewById(R.id.sign_in_button);
+        connectButton.setOnClickListener(this);
+        // add edit text for the private server url and proxy url
+        urlTextField = (EditText) findViewById(R.id.server_url_field);
 
-        // add edit text for the private server url
-        privateServerInput = (EditText) findViewById(R.id.private_server_url_input);
+        proxyTextField = (EditText) findViewById(R.id.proxy_url_field);
 
-        privateServerProxyPortInput = (EditText) findViewById(R.id.private_server_proxy_port);
-
-
-        httpsProxyPortTextField = (EditText) findViewById(R.id.https_edit_text);
-        torProxyPortTextField = (EditText) findViewById(R.id.tor_edit_text);
-        i2pProxyPortTextField = (EditText) findViewById(R.id.i2p_edit_text);
-
-        httpsServerButton = (Button) findViewById(R.id.https_sign_in_button);
-        torServerButton = (Button) findViewById(R.id.tor_sign_in_button);
-        i2pServerButton = (Button) findViewById(R.id.i2p_sign_in_button);
-
-        // Set click listeners
-        httpsServerButton.setOnClickListener(this);
-        torServerButton.setOnClickListener(this);
-        i2pServerButton.setOnClickListener(this);
-
-
-        // set the click listener fir the annon button
-        privateServerButton.setOnClickListener(this);
 
 
     }
 
 
+
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.https_sign_in_button:
-                httpsServerSignIn();
-                break;
-            case R.id.tor_sign_in_button:
-                torServerSignIn();
-                break;
+            case R.id.sign_in_button:
+                String networkType = (String) networkAdapter.getItem(networkSpinner.getSelectedItemPosition());
+                switch (networkType)
+                {
+                    case "HTTPS":
+                        serverSignInWorker(HTTPS_SIGN_IN);
+                        break;
+                    case "TOR":
+                        serverSignInWorker(TOR_SIGN_IN);
+                        break;
+                    case "I2P":
+                        serverSignInWorker(I2P_SIGN_IN);
+                        break;
+                    case "Custom":
+                        serverSignInWorker(I2P_SIGN_IN);
+                        break;
+                    default:
+                        break;
 
-            case R.id.i2p_sign_in_button:
-                i2pServerSignIn();
-                break;
+                }
 
-            case R.id.private_server_sign_in_button:
-                privateServerSignIn();
-                break;
         }
     }
 
@@ -141,10 +224,42 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         String proxyText = "dumb";
         boolean serverTestResult = false;
 
-
+        //proxySpinner.setSelection(proxyAdapter.getPosition("None"));
+        String proxyType = (String) proxySpinner.getSelectedItem();
+        int proxyCode = 0;
+        switch (proxyType)
+        {
+            case "SOCKS":
+                proxyCode = 1;
+                break;
+            case "HTTP":
+                proxyCode = 2;
+                break;
+            case "None":
+                proxyCode = 0;
+                break;
+            default:
+                proxyCode = 0;
+                break;
+        }
+        String proxyURL = "";
         int proxyPort = -1;
+        if (isStringAValidHostnameColonPortNumber(proxyTextField.getText().toString()))
+        {
+            String[] parts = proxyTextField.getText().toString().split(":");
+            proxyURL = parts[0];
+            proxyPort = Integer.parseInt(parts[1]);
+            dumb_debugging("this is proxy url "+proxyURL);
+            serverTestResult = isServerReachable(this,urlTextField.getText().toString(), proxyPort, proxyURL, proxyCode);
 
-        switch (type) {
+        }
+        else
+        {
+            serverTestResult = isServerReachable(this, urlTextField.getText().toString());
+        }
+
+
+ /*       switch (type) {
             case HTTPS_SIGN_IN: // https
                 privateServerURL = "https://" + Utility.httpsAddress + "/api/";
                 proxyText = httpsProxyPortTextField.getText().toString();
@@ -169,18 +284,17 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 serverTestResult = Utility.check_I2P_server(this, proxyText);
                 break;
         }
-
+*/
         dumb_debugging("proxy text is " + proxyText);
 
         if (serverTestResult) {
             extrasManager.setIntent(new Intent(SignInActivity.this,
                     ConfigureKeysAndIDActivity.class));
-            extrasManager.setPrivateServerURL(privateServerURL);
-
+            extrasManager.setPrivateServerURL(urlTextField.getText().toString());
 
             // set the timeouts depending on connection type
             //TODO actually come up with good numbers for this
-            switch (type)
+            /*switch (type)
             {
                 case HTTPS_SIGN_IN:
                     extrasManager.setTimeOut(2000); // TODO say I am sorry to those that use GEO stationary satcomm this will probably fail
@@ -189,15 +303,21 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                     extrasManager.setTimeOut(3000);
                     break;
                 case I2P_SIGN_IN:
-                    extrasManager.setTimeOut(4000);
+                    extrasManager.setTimeOut(5000);
                     break;
 
-            }
+            }*/
+            extrasManager.setTimeOut(7500);
 
 
 
+
+            dumb_debugging("Proxy port is " + Integer.toString(proxyPort));
             if (proxyPort > 0) {
-                extrasManager.setProxyPort(proxyPort);
+                // hostname:port:type
+                //extrasManager.setProxyInfo(new String[] {proxyURL,Integer.toString(proxyPort), Integer.toString(proxyCode)});
+                extrasManager.setProxyInfo(new String[] {proxyURL,Integer.toString(proxyPort), proxyCode == 1 ? "SOCKS" : "HTTP" });
+                dumb_debugging("proxy array is in the extras manager");
             }
             extrasManager.setAutoPub(true);
             startActivity(extrasManager.getIntent());
@@ -207,18 +327,8 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
             if (proxyPort != -1)
                 proxyStatusText = " with proxy on " + proxyPort;
 
+            connectButton.setText("Sign in failed");
 
-            switch (type) {
-                case HTTPS_SIGN_IN: // https
-                    httpsServerButton.setText("https failed" + proxyStatusText);
-                    break;
-                case TOR_SIGN_IN: //tor
-                    torServerButton.setText("tor failed" + proxyStatusText);
-                    break;
-                case I2P_SIGN_IN: //i2p
-                    i2pServerButton.setText("i2p failed" + proxyStatusText);
-                    break;
-            }
 
 
         }
@@ -245,6 +355,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     }
 
 
+    /*
     private void privateServerSignIn() {
         String hostname = privateServerInput.getText().toString();
         hostname = hostname.trim();
@@ -291,5 +402,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
             privateServerButton.setText("server test failed, please try again");
         }
 
-    }
+    }*/
+
+
 }

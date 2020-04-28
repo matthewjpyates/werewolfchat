@@ -1,0 +1,28 @@
+{
+  "buildFiles": [
+    "/home/lcdr_data/gits/liboqs/liboqs-cpp/CMakeLists.txt"
+  ],
+  "cleanCommands": [
+    "/home/lcdr_data/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/armeabi-v7a --target clean"
+  ],
+  "libraries": {
+    "sig-Release-armeabi-v7a": {
+      "artifactName": "sig",
+      "buildCommand": "/home/lcdr_data/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/armeabi-v7a --target sig",
+      "abi": "armeabi-v7a",
+      "output": "/home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/armeabi-v7a/sig"
+    },
+    "kem-Release-armeabi-v7a": {
+      "artifactName": "kem",
+      "buildCommand": "/home/lcdr_data/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/armeabi-v7a --target kem",
+      "abi": "armeabi-v7a",
+      "output": "/home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/armeabi-v7a/kem"
+    },
+    "rand-Release-armeabi-v7a": {
+      "artifactName": "rand",
+      "buildCommand": "/home/lcdr_data/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/armeabi-v7a --target rand",
+      "abi": "armeabi-v7a",
+      "output": "/home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/release/armeabi-v7a/rand"
+    }
+  }
+}

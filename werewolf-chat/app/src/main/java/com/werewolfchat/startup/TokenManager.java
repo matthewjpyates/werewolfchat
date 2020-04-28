@@ -225,7 +225,7 @@ public class TokenManager {
         requestInProgress = true;
         String getNewTokenUrl = Utility.makeGetStringForPullingNewToken(this.serverURL, this.userId);
         dumb_debugging("about to request new token with \n" + getNewTokenUrl);
-
+        dumb_debugging("url to publish " + getNewTokenUrl);
         queryURL(getNewTokenUrl, passedInQueue, new GoodTokenPull(followOnTask), new BadTokenPull());
 
     }

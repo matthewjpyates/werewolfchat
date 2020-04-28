@@ -38,8 +38,8 @@ import com.google.firebase.database.ValueEventListener;*/
 
 public class ConfigureKeysAndIDActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private static final SignatureParameters SIGNATURE_PARAMS = SignatureParameters.APR2011_439_PROD;
-    private static final EncryptionParameters ENCRYPTION_PARAMS = EncryptionParameters.APR2011_439_FAST;
+    //private static final SignatureParameters SIGNATURE_PARAMS = SignatureParameters.APR2011_439_PROD;
+    //private static final EncryptionParameters ENCRYPTION_PARAMS = EncryptionParameters.APR2011_439_FAST;
     private static final String publishButtonText = "Continue by Publishing ID and Public Key";
     public static final String PUBLIC_KEYS_CHILD = "public_keys";
     NtruEncrypt ntruEnc;
@@ -105,6 +105,7 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
         File internalStorage = this.getFilesDir();
         priavteKeyStorage = new File(internalStorage, "chat.key");
         if (priavteKeyStorage.exists()) {
+            dumb_debugging("a key file was found");
             String fileOutput = "foo";
             this.loadingView.setText("Keyfile found, loading");
 
@@ -137,6 +138,7 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
             if (this.extrasManager.autoPub) {
                 dumb_debugging("At 2ndposition in lookup keys with autopub set");
                 this.extrasManager.setAutoPub(false);
+                dumb_debugging("point 5");
                 this.tokenManager.getNewTokenThenExecuteCommand(this.queue, new VerifyKeysAfterGettingThemWorker());
 
             }
@@ -145,12 +147,12 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
             keyWasFound = true;
         } else {
 
-
+            dumb_debugging("key was not found");
             // file dose not exist, so make new keys and save to file
             // writen in the format encypt pub ### encrypt priv ### sig pub
             //                                                         ### sig priv ### id
             this.loadingView.setText("No keyfile found, generating");
-            this.ntruEnc = new NtruEncrypt(ENCRYPTION_PARAMS);
+            this.ntruEnc = new NtruEncrypt(Utility.ENCRYPTION_PARAMS);
             //this.ntruSig = new NtruSign(SIGNATURE_PARAMS);
             this.encKP = ntruEnc.generateKeyPair();
             //this.sigKP = ntruSig.generateKeyPair();
@@ -164,6 +166,7 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
                 dumb_debugging("At 2ndposition_other in lookup keys with autopub set");
                 this.setGoodNews("Publishing new keys");
                 this.extrasManager.setAutoPub(false);
+                dumb_debugging("at point 6");
                 publish_private_server_info();
                 //this.tokenManager.getNewTokenThenExecuteCommand(this.queue, new VerifyKeysAfterGettingThemWorker());
 
@@ -204,7 +207,7 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
 
         this.loadingView.setText("Generating new keys");
 
-        this.ntruEnc = new NtruEncrypt(ENCRYPTION_PARAMS);
+        this.ntruEnc = new NtruEncrypt(Utility.ENCRYPTION_PARAMS);
         //this.ntruSig = new NtruSign(SIGNATURE_PARAMS);
         this.encKP = ntruEnc.generateKeyPair();
         //this.sigKP = ntruSig.generateKeyPair();
@@ -262,11 +265,6 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
 
         lookupOrGenerateKeys();
 
-        /*if(this.extrasManager.autoPub)
-        {
-            dumb_debugging("auto pub is set");
-            this.publishKeyWrapper();
-        }*/
 
     }
 
@@ -285,12 +283,7 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
                 makeNewKeys();
                 break;
 
-            /*case R.id.button_to_not_publish:
-                this.save_key_info_without_publishing();
-                this.setkeyStringsFile();
-                startActivity(makeIntentWithKeys());
-                finish();
-                return;*/
+
         }
     }
 
@@ -442,10 +435,12 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
         extrasManager.setPrivKey(this.encKP.getPrivate().getEncoded());
         extrasManager.setPrivateServerURL(this.privateServerURL);
         extrasManager.setChatID(this.werewolfChatId);
+        dumb_debugging("point 7");
         if (keyWasFound && tokenManager.isTokenSet()) {
             dumb_debugging("about to try to verfiy keys");
             verifyKeys();
         } else {
+            dumb_debugging("about to use query string point 8 " + queryStr);
             Utility.queryURL(queryStr, this.queue, new PubKeyPublishGoodResultCommand(), new PubKeyPublishBadResultCommand());
         }
         return;
@@ -492,12 +487,5 @@ public class ConfigureKeysAndIDActivity extends AppCompatActivity implements Vie
 
     }
 
-    /*public void update_id(String newID) {
-
-
-            Utility.dumb_debugging("checking private server id");
-            update_id_private_server(newID);
-
-    }*/
 
 }

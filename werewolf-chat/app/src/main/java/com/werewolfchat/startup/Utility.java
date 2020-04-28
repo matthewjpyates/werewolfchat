@@ -7,6 +7,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -33,6 +34,7 @@ import java.net.Proxy;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 //import android.support.v4.widget.NestedScrollView;
 
@@ -41,8 +43,12 @@ import java.util.Random;
 
 public class Utility {
 
+    // 0 no logs, 1 a few logs, 2 most logs, 3 all logs
+    public static final int LOGGING_LEVEL = 3;
 
-    public static final EncryptionParameters ENCRYPTION_PARAMS = EncryptionParameters.APR2011_439_FAST;
+
+    //trying the larger key size
+    public static final EncryptionParameters ENCRYPTION_PARAMS = /*EncryptionParameters.EES1499EP1; */ EncryptionParameters.EES1087EP2; //EncryptionParameters.EES1499EP1;    //EncryptionParameters.APR2011_439_FAST;
 
 
     public static final String torAddress = "pmbldnf4zyeb4esolfmfv2uzfzdcusgzvxwkg5r6fnm7vbunjk5gvfyd.onion";
@@ -131,6 +137,38 @@ public class Utility {
             return isServerReachable(context, serverurl);
         }
     }
+
+    public static boolean isStringAValidHostnameColonPortNumber(String stringToCheck)
+    {
+        // https://stackoverflow.com/questions/25966391/regular-expression-checking-valid-hostname-port/25966545
+        // [^\:]+:[0-9]{1,5}
+        if(Pattern.matches("[^\\:]+:[0-9]{1,5}", stringToCheck))
+        {
+            String[] parts = stringToCheck.split(":");
+            if(parts.length == 2)
+            {
+                int portNum = Integer.parseInt(parts[1]);
+                if(portNum>0 && portNum<65536)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+
+    }
+
 
     public static boolean check_TOR_server(Context context, String proxyStr)
     {
@@ -421,6 +459,71 @@ public class Utility {
     }
 
 
+
+
+    public static boolean isServerReachable(Context context, String urlToTest, int proxyPort, String proxyHostName, int proxyType) {
+
+
+
+        ConnectivityManager connMan = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = connMan.getActiveNetworkInfo();
+        if (netInfo != null && netInfo.isConnected()) {
+            try {
+                URL urlServer = new URL(urlToTest);
+                Proxy proxy;
+                HttpURLConnection urlConn;
+
+                if(proxyType == 1) {
+                    dumb_debugging("proxy host name "+proxyHostName);
+                    proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(proxyHostName, proxyPort));
+
+                    urlConn = (HttpURLConnection) urlServer.openConnection(proxy);
+                }
+                else if (proxyType == 2) {
+                    dumb_debugging("proxy host name "+proxyHostName);
+
+                    proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHostName, proxyPort));
+                    dumb_debugging("proxy host name able to make proxy");
+
+                    urlConn = (HttpURLConnection) urlServer.openConnection(proxy);
+                }
+                else
+                {
+                    urlConn = (HttpURLConnection) urlServer.openConnection();
+                }
+
+
+
+                //HttpURLConnection urlConn = (HttpURLConnection) urlServer.openConnection();
+
+                urlConn.setConnectTimeout(5000); //<- 5 Seconds Timeout
+                dumb_debugging("trying the test to " + urlToTest);
+
+                urlConn.connect();
+                if (urlConn.getResponseCode() == 200) {
+                    dumb_debugging("it worked");
+
+                    return true;
+                } else {
+                    dumb_debugging("it failed");
+
+                    return false;
+                }
+            } catch (MalformedURLException e1) {
+                dumb_debugging("this is a malformed url " + urlToTest);
+
+
+                return false;
+            } catch (IOException e) {
+                dumb_debugging(e.getLocalizedMessage());
+
+                return false;
+            }
+        }
+        return false;
+    }
+
+
     public static boolean isServerReachable(Context context, String urlToTest, int proxyPort) {
 
 
@@ -432,7 +535,7 @@ public class Utility {
                 URL urlServer = new URL(urlToTest);
                 Proxy proxy;
 
-                if(proxyPort == 9050)https://www.reddit.com/r/werewolf_chat/
+                if(proxyPort == 9050)
                     proxy =  new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", proxyPort));
                 else
                     proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", proxyPort));
@@ -579,7 +682,7 @@ public class Utility {
     public static void queryURL(String url, RequestQueue passedInQueue, Command inputWorkerForGood, Command inputWorkerForBad) {
         final Command worker_good = inputWorkerForGood;
         final Command worker_bad = inputWorkerForBad;
-// Request a string response from the provided URL.
+        // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -592,6 +695,11 @@ public class Utility {
                 worker_bad.execute(error.toString());
             }
         });
+
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                8000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
 // Add the request to the RequestQueue.
         passedInQueue.add(stringRequest);

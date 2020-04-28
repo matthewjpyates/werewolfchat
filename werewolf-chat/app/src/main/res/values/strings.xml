@@ -28,6 +28,18 @@
     <string name="menu_send">Send</string>
     <string name="title_activity_dist_end_picker"> Choose whom to talk to
     </string>
+        <string-array name="network_array">
+            <item>HTTPS</item>
+            <item>TOR</item>
+            <item>I2P</item>
+            <item>Custom</item>
+        </string-array>
+<string-array name="proxy_array">
+<item>None</item>
+<item>SOCKS</item>
+<item>HTTP</item>
+</string-array>
+
     <string name="large_text">
         "Material is the metaphor.\n\n"
 

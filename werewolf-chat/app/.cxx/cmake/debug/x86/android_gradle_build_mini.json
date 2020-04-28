@@ -1,0 +1,28 @@
+{
+  "buildFiles": [
+    "/home/lcdr_data/gits/liboqs/liboqs-cpp/CMakeLists.txt"
+  ],
+  "cleanCommands": [
+    "/home/lcdr_data/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/debug/x86 --target clean"
+  ],
+  "libraries": {
+    "kem-Debug-x86": {
+      "artifactName": "kem",
+      "buildCommand": "/home/lcdr_data/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/debug/x86 --target kem",
+      "abi": "x86",
+      "output": "/home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/debug/x86/kem"
+    },
+    "sig-Debug-x86": {
+      "artifactName": "sig",
+      "buildCommand": "/home/lcdr_data/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/debug/x86 --target sig",
+      "abi": "x86",
+      "output": "/home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/debug/x86/sig"
+    },
+    "rand-Debug-x86": {
+      "artifactName": "rand",
+      "buildCommand": "/home/lcdr_data/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/debug/x86 --target rand",
+      "abi": "x86",
+      "output": "/home/lcdr_data/gits/werewolf-chat/werewolf-chat/app/.cxx/cmake/debug/x86/rand"
+    }
+  }
+}

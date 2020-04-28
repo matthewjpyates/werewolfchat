@@ -12,6 +12,7 @@ import com.werewolfchat.startup.ntru.encrypt.NtruEncrypt;
 import java.util.ArrayList;
 
 import static com.werewolfchat.startup.Utility.ENCRYPTION_PARAMS;
+import static com.werewolfchat.startup.Utility.dumb_debugging;
 
 public class ExtrasManager {
 
@@ -51,9 +52,9 @@ public class ExtrasManager {
             case FIREBASE_EMAIL_EXTRA:
                 setFirebaseEmail((String) valueToSet);
                 break;
-            case PROXY_PORT_EXTRA:
-                if((Integer) valueToSet > 0)
-                    setProxyPort((Integer) valueToSet);
+            case PROXY_INFO:
+                if(((String[]) valueToSet).length == 3)
+                    setProxyInfo((String[]) valueToSet);
                 break;
             case TIME_OUT_EXTRA:
                 if((Integer) valueToSet > 0)
@@ -94,10 +95,11 @@ public class ExtrasManager {
             return -1;
         }
 
-        public void setProxyPort(int proxyPort) {
-            this.proxyPort = proxyPort;
+        public void setProxyInfo(String[] input) {
+            this.proxyPort = Integer.parseInt(input[1]);
+            this.proxy_info = input;
             this.hasProxyPort = true;
-            this.intent.putExtra(PROXY_PORT_EXTRA, proxyPort);
+            this.intent.putExtra(PROXY_INFO, input);
         }
 
         public int getTimeOut() {
@@ -258,15 +260,17 @@ public class ExtrasManager {
         public static final String CHAT_ID_EXTRA = "chat_id";
         public static final String FIREBASE_UID_EXTRA = "firebase_uid";
         public static final String FIREBASE_EMAIL_EXTRA = "firebase_email";
-        public static final String PROXY_PORT_EXTRA = "proxy_port";
+        public static final String PROXY_INFO = "proxy_info";
+
         public static final String TIME_OUT_EXTRA = "time_out";
         public static final String USING_SELF_SIGNED_TLS_CERT_EXTRA = "use_self_signed_cert";
-    public static final String TOKEN_STR = "token_str";
-    public static final String AUTO_PUB_STR = "auto_pub";
+        public static final String TOKEN_STR = "token_str";
+        public static final String AUTO_PUB_STR = "auto_pub";
 
         public boolean hasPrivateServerURL, hasDistEndID, hasDistEndKey, hasPublicKey, hasPrivateKey;
         public boolean hasChatID, hasFirebaseUID, hasFirebaseEmail, hasProxyPort, hasTimeOut, usingselfSignedCert;
-    public boolean hasTokenString, autoPub;
+        public boolean hasTokenString, autoPub;
+        public String[] proxy_info; // hostname:port:type
 
 
         public void setBoolsToFalse()
@@ -306,8 +310,8 @@ public class ExtrasManager {
                 this.setFirebaseUID(this.intent.getStringExtra(FIREBASE_UID_EXTRA));
             if(this.intent.hasExtra(FIREBASE_EMAIL_EXTRA))
                 this.setFirebaseEmail(this.intent.getStringExtra(FIREBASE_EMAIL_EXTRA));
-            if(this.intent.hasExtra(PROXY_PORT_EXTRA))
-                this.setProxyPort(this.intent.getIntExtra(PROXY_PORT_EXTRA, -1));
+            if(this.intent.hasExtra(PROXY_INFO))
+                this.setProxyInfo(this.intent.getStringArrayExtra(PROXY_INFO));
             if(this.intent.hasExtra(TIME_OUT_EXTRA))
                 this.setTimeOut(this.intent.getIntExtra(TIME_OUT_EXTRA, -1));
             if(this.intent.hasExtra(USING_SELF_SIGNED_TLS_CERT_EXTRA))
@@ -337,7 +341,7 @@ public class ExtrasManager {
             this.extraStrings.add(CHAT_ID_EXTRA);
             this.extraStrings.add(FIREBASE_UID_EXTRA);
             this.extraStrings.add(FIREBASE_EMAIL_EXTRA);
-            this.extraStrings.add(PROXY_PORT_EXTRA);
+            this.extraStrings.add(PROXY_INFO);
             this.extraStrings.add(TIME_OUT_EXTRA);
             this.extraStrings.add(USING_SELF_SIGNED_TLS_CERT_EXTRA);
             this.extraStrings.add(TOKEN_STR);
@@ -387,15 +391,16 @@ public class ExtrasManager {
         public RequestQueue makeVolley(Context context)
         {
             RequestQueue volleyToReturn;
+            int tempTimeout = 4000;
+            if(this.timeOut > 0)
+                tempTimeout = this.timeOut;
             if(this.hasProxyPort && proxyPort > 0) {
-                if(this.timeOut > 0)
-                    volleyToReturn = Volley.newRequestQueue(context, new ProxiedHurlStack(this.proxyPort,this.timeOut));
-                else
-                    volleyToReturn = Volley.newRequestQueue(context, new ProxiedHurlStack(this.proxyPort, 4000));
+                dumb_debugging("the timeout is "+Integer.toString(tempTimeout));
+                    volleyToReturn = Volley.newRequestQueue(context, new ProxiedHurlStack(this.proxy_info[0],Integer.parseInt(this.proxy_info[1]) , tempTimeout, this.proxy_info[2]));
             }
-            else
+            else {
                 volleyToReturn = Volley.newRequestQueue(context);
-
+            }
 
 
             return volleyToReturn;

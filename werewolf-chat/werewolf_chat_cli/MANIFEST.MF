@@ -1,0 +1,2 @@
+Main-Class: com.werewolfchat.werewolf_chat_cli.CryptoWorker
+

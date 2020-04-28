@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/werewolf-chat.iml" filepath="$PROJECT_DIR$/werewolf-chat.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="werewolf-chat/app" />
+      <module fileurl="file://$PROJECT_DIR$/werewolf-chat.iml" filepath="$PROJECT_DIR$/werewolf-chat.iml" group="werewolf-chat" />
+      <module fileurl="file://$PROJECT_DIR$/werewolf_chat_cli/werewolf_chat_cli.iml" filepath="$PROJECT_DIR$/werewolf_chat_cli/werewolf_chat_cli.iml" group="werewolf-chat/werewolf_chat_cli" />
     </modules>
   </component>
 </project>

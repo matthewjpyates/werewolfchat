@@ -1,0 +1,16 @@
+[1/2] Building CXX object CMakeFiles/kem.dir/examples/kem.cpp.o
+[2/2] Linking CXX executable kem
+FAILED: : && /home/lcdr_data/Android/Sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++  --target=i686-none-linux-android21 --gcc-toolchain=/home/lcdr_data/Android/Sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/linux-x86_64 --sysroot=/home/lcdr_data/Android/Sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/linux-x86_64/sysroot  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -mstackrealign -fno-addrsig -Wa,--noexecstack -Wformat -Werror=format-security   -pedantic -Wall -Wextra -Weffc++ -O0 -fno-limit-debug-info  -Wl,--exclude-libs,libgcc.a -Wl,--exclude-libs,libatomic.a -static-libstdc++ -Wl,--build-id -Wl,--warn-shared-textrel -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments -Wl,-z,noexecstack -Wl,--gc-sections CMakeFiles/kem.dir/examples/kem.cpp.o  -o kem -L/usr/local/lib -loqs -latomic -lm && :
+/home/lcdr_data/Android/Sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/linux-x86_64/lib/gcc/i686-linux-android/4.9.x/../../../../i686-linux-android/bin/ld: warning: skipping incompatible /usr/local/lib/liboqs.so while searching for oqs
+/home/lcdr_data/Android/Sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/linux-x86_64/lib/gcc/i686-linux-android/4.9.x/../../../../i686-linux-android/bin/ld: error: cannot find -loqs
+/home/lcdr_data/gits/liboqs/liboqs-cpp/include/oqs_cpp.h:206: error: undefined reference to 'OQS_KEM_new'
+/home/lcdr_data/gits/liboqs/liboqs-cpp/include/oqs_cpp.h:291: error: undefined reference to 'OQS_KEM_keypair'
+/home/lcdr_data/gits/liboqs/liboqs-cpp/include/oqs_cpp.h:317: error: undefined reference to 'OQS_KEM_encaps'
+/home/lcdr_data/gits/liboqs/liboqs-cpp/include/oqs_cpp.h:342: error: undefined reference to 'OQS_KEM_decaps'
+/home/lcdr_data/gits/liboqs/liboqs-cpp/include/oqs_cpp.h:268: error: undefined reference to 'OQS_MEM_cleanse'
+/home/lcdr_data/gits/liboqs/liboqs-cpp/include/oqs_cpp.h:87: error: undefined reference to 'OQS_KEM_alg_count'
+/home/lcdr_data/gits/liboqs/liboqs-cpp/include/oqs_cpp.h:122: error: undefined reference to 'OQS_KEM_alg_identifier'
+/home/lcdr_data/gits/liboqs/liboqs-cpp/include/oqs_cpp.h:110: error: undefined reference to 'OQS_KEM_alg_is_enabled'
+/home/lcdr_data/gits/liboqs/liboqs-cpp/include/oqs_cpp.h:167: error: undefined reference to 'OQS_KEM_free'
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+ninja: build stopped: subcommand failed.

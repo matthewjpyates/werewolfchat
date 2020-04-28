@@ -1,0 +1,15 @@
+[1/1] Linking CXX executable sig
+FAILED: : && /home/lcdr_data/Android/Sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++  --target=armv7-none-linux-androideabi21 --gcc-toolchain=/home/lcdr_data/Android/Sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/linux-x86_64 --sysroot=/home/lcdr_data/Android/Sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/linux-x86_64/sysroot  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -fno-addrsig -march=armv7-a -mthumb -Wa,--noexecstack -Wformat -Werror=format-security   -pedantic -Wall -Wextra -Weffc++ -O0 -fno-limit-debug-info  -Wl,--exclude-libs,libgcc.a -Wl,--exclude-libs,libatomic.a -static-libstdc++ -Wl,--build-id -Wl,--warn-shared-textrel -Wl,--fatal-warnings -Wl,--exclude-libs,libunwind.a -Wl,--no-undefined -Qunused-arguments -Wl,-z,noexecstack -Wl,--gc-sections CMakeFiles/sig.dir/examples/sig.cpp.o  -o sig -L/usr/local/lib -loqs -latomic -lm && :
+/home/lcdr_data/Android/Sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/linux-x86_64/lib/gcc/arm-linux-androideabi/4.9.x/../../../../arm-linux-androideabi/bin/ld: warning: skipping incompatible /usr/local/lib/liboqs.so while searching for oqs
+/home/lcdr_data/Android/Sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/linux-x86_64/lib/gcc/arm-linux-androideabi/4.9.x/../../../../arm-linux-androideabi/bin/ld: error: cannot find -loqs
+/home/lcdr_data/gits/liboqs/liboqs-cpp/include/oqs_cpp.h:522: error: undefined reference to 'OQS_SIG_new'
+/home/lcdr_data/gits/liboqs/liboqs-cpp/include/oqs_cpp.h:606: error: undefined reference to 'OQS_SIG_keypair'
+/home/lcdr_data/gits/liboqs/liboqs-cpp/include/oqs_cpp.h:636: error: undefined reference to 'OQS_SIG_sign'
+/home/lcdr_data/gits/liboqs/liboqs-cpp/include/oqs_cpp.h:662: error: undefined reference to 'OQS_SIG_verify'
+/home/lcdr_data/gits/liboqs/liboqs-cpp/include/oqs_cpp.h:583: error: undefined reference to 'OQS_MEM_cleanse'
+/home/lcdr_data/gits/liboqs/liboqs-cpp/include/oqs_cpp.h:403: error: undefined reference to 'OQS_SIG_alg_count'
+/home/lcdr_data/gits/liboqs/liboqs-cpp/include/oqs_cpp.h:438: error: undefined reference to 'OQS_SIG_alg_identifier'
+/home/lcdr_data/gits/liboqs/liboqs-cpp/include/oqs_cpp.h:426: error: undefined reference to 'OQS_SIG_alg_is_enabled'
+/home/lcdr_data/gits/liboqs/liboqs-cpp/include/oqs_cpp.h:483: error: undefined reference to 'OQS_SIG_free'
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+ninja: build stopped: subcommand failed.
